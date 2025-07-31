@@ -1,20 +1,7 @@
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 
 function Dashboard() {
-  const { currentUser, loading } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!loading && !currentUser) {
-      navigate("/login");
-    }
-  }, [currentUser, loading, navigate]);
-
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
+  const { currentUser } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
