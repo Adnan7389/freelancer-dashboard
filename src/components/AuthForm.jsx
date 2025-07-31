@@ -6,6 +6,7 @@ function AuthForm({ mode = "login", onSubmit }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleSubmit = async (e) => {
   e.preventDefault();
@@ -17,6 +18,11 @@ function AuthForm({ mode = "login", onSubmit }) {
     return;
   }
 
+   if (mode === "signup" && password !== confirmPassword) {
+  setError("Passwords do not match.");
+  return;
+  }
+  
   setIsSubmitting(true);
   try {
     await onSubmit(email, password);
@@ -55,6 +61,18 @@ function AuthForm({ mode = "login", onSubmit }) {
               required
             />
           </div>
+            {mode === "signup" && (
+             <div className="mb-4">
+               <label className="block text-gray-700">Confirm Password</label>
+               <input
+                 type="password"
+                 value={confirmPassword}
+                 onChange={(e) => setConfirmPassword(e.target.value)}
+                 className="w-full p-2 border rounded"
+                 required
+               />
+             </div>
+            )}
           <button
             type="submit"
             className={`w-full text-white p-2 rounded ${
