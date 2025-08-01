@@ -1,94 +1,118 @@
-import { useState } from "react";
-import { collection, addDoc } from "firebase/firestore";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../context/AuthContext";
+import toast, { Toaster } from "react-hot-toast";
+
+// Validation schema
+const incomeSchema = z.object({
+  amount: z
+    .number({ invalid_type_error: "Amount is required" })
+    .positive("Amount must be greater than 0"),
+  platform: z.string(),
+  date: z
+    .string()
+    .refine((date) => new Date(date) <= new Date(), {
+      message: "Date cannot be in the future",
+    }),
+  description: z.string().optional(),
+});
 
 function IncomeForm() {
   const { currentUser } = useAuth();
-  const [amount, setAmount] = useState("");
-  const [platform, setPlatform] = useState("Fiverr");
-  const [date, setDate] = useState("");
-  const [description, setDescription] = useState("");
-  const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!amount || !date) {
-      setError("Amount and date are required");
-      return;
-    }
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(incomeSchema),
+    defaultValues: {
+      platform: "Fiverr",
+    },
+  });
 
+  const onSubmit = async (data) => {
     try {
       await addDoc(collection(db, "incomes"), {
         userId: currentUser.uid,
-        amount: parseFloat(amount),
-        platform,
-        date,
-        description,
-        createdAt: new Date().toISOString(),
+        amount: data.amount,
+        platform: data.platform,
+        date: data.date,
+        description: data.description,
+        createdAt: serverTimestamp(),
       });
-      setAmount("");
-      setPlatform("Fiverr");
-      setDate("");
-      setDescription("");
-      setError("");
+
+      toast.success("Income added!");
+      reset();
     } catch (err) {
-      setError("Failed to add income: " + err.message);
+      toast.error("Failed to add income: " + err.message);
     }
   };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
+      <Toaster position="top-center" />
       <h3 className="text-lg font-bold mb-4">Add Income</h3>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        {/* Amount */}
         <div className="mb-4">
           <label className="block text-gray-700">Amount ($)</label>
           <input
             type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="w-full p-2 border rounded"
             step="0.01"
-            required
+            {...register("amount", { valueAsNumber: true })}
+            className="w-full p-2 border rounded"
           />
+          {errors.amount && (
+            <p className="text-red-500 text-sm">{errors.amount.message}</p>
+          )}
         </div>
+
+        {/* Platform */}
         <div className="mb-4">
           <label className="block text-gray-700">Platform</label>
-          <select
-            value={platform}
-            onChange={(e) => setPlatform(e.target.value)}
-            className="w-full p-2 border rounded"
-          >
+          <select {...register("platform")} className="w-full p-2 border rounded">
             <option value="Fiverr">Fiverr</option>
             <option value="Upwork">Upwork</option>
             <option value="Other">Other</option>
           </select>
         </div>
+
+        {/* Date */}
         <div className="mb-4">
           <label className="block text-gray-700">Date</label>
           <input
             type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
+            {...register("date")}
             className="w-full p-2 border rounded"
-            required
           />
+          {errors.date && (
+            <p className="text-red-500 text-sm">{errors.date.message}</p>
+          )}
         </div>
+
+        {/* Description */}
         <div className="mb-4">
           <label className="block text-gray-700">Description (Optional)</label>
           <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            {...register("description")}
             className="w-full p-2 border rounded"
             rows="3"
           />
         </div>
+
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+          disabled={isSubmitting}
+          className={`w-full text-white p-2 rounded ${
+            isSubmitting ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+          }`}
         >
-          Add Income
+          {isSubmitting ? "Adding..." : "Add Income"}
         </button>
       </form>
     </div>
