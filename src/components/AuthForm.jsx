@@ -1,33 +1,44 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 function AuthForm({ mode = "login", onSubmit }) {
-  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [serverError, setServerError] = useState("");
+
+  const schema = z.object({
+    email: z.string().email("Please enter a valid email."),
+    password: z.string().min(6, "Password must be at least 6 characters."),
+    confirmPassword: mode === "signup"
+      ? z.string().min(6, "Please confirm your password.")
+      : z.string().optional(),
+  });
+
+  const formSchema =
+    mode === "signup"
+      ? schema.refine((data) => data.password === data.confirmPassword, {
+          message: "Passwords do not match.",
+          path: ["confirmPassword"],
+        })
+      : schema;
 
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors, isSubmitting },
-  } = useForm();
-
-  const password = watch("password");
-  const confirmPassword = watch("confirmPassword");
+  } = useForm({
+    resolver: zodResolver(formSchema),
+  });
 
   const handleFormSubmit = async (data) => {
-    setError("");
-
-    if (mode === "signup" && data.password !== data.confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
+    setServerError("");
 
     try {
       await onSubmit(data.email, data.password);
     } catch (err) {
-      setError(err.message);
+      setServerError(err.message);
     }
   };
 
@@ -37,19 +48,14 @@ function AuthForm({ mode = "login", onSubmit }) {
         <h2 className="text-2xl font-bold mb-6 text-center">
           {mode === "signup" ? "Sign Up" : "Login"}
         </h2>
-        {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
-        <form onSubmit={handleSubmit(handleFormSubmit)}>
+        {serverError && <p className="text-red-500 mb-4 text-center">{serverError}</p>}
+        <form onSubmit={handleSubmit(handleFormSubmit)} noValidate>
+          {/* Email */}
           <div className="mb-4">
             <label className="block text-gray-700">Email</label>
             <input
               type="email"
-              {...register("email", {
-                required: "Email is required",
-                pattern: {
-                  value: /^\S+@\S+\.\S+$/,
-                  message: "Invalid email address",
-                },
-              })}
+              {...register("email")}
               className="w-full p-2 border rounded"
             />
             {errors.email && (
@@ -57,17 +63,12 @@ function AuthForm({ mode = "login", onSubmit }) {
             )}
           </div>
 
+          {/* Password */}
           <div className="mb-4">
             <label className="block text-gray-700">Password</label>
             <input
               type={showPassword ? "text" : "password"}
-              {...register("password", {
-                required: "Password is required",
-                minLength: {
-                  value: 6,
-                  message: "Password must be at least 6 characters",
-                },
-              })}
+              {...register("password")}
               className="w-full p-2 border rounded"
             />
             {errors.password && (
@@ -82,20 +83,17 @@ function AuthForm({ mode = "login", onSubmit }) {
             </button>
           </div>
 
+          {/* Confirm Password (only on signup) */}
           {mode === "signup" && (
             <div className="mb-4">
               <label className="block text-gray-700">Confirm Password</label>
               <input
                 type={showPassword ? "text" : "password"}
-                {...register("confirmPassword", {
-                  required: "Please confirm your password",
-                })}
+                {...register("confirmPassword")}
                 className="w-full p-2 border rounded"
               />
               {errors.confirmPassword && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.confirmPassword.message}
-                </p>
+                <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>
               )}
             </div>
           )}
@@ -119,14 +117,14 @@ function AuthForm({ mode = "login", onSubmit }) {
           {mode === "signup" ? (
             <>
               Already have an account?{" "}
-              <Link to="/login" className="text-blue-600">
+              <Link to="/login" className="text-blue-600 hover:underline">
                 Login
               </Link>
             </>
           ) : (
             <>
               Don&apos;t have an account?{" "}
-              <Link to="/signup" className="text-blue-600">
+              <Link to="/signup" className="text-blue-600 hover:underline">
                 Sign Up
               </Link>
             </>
