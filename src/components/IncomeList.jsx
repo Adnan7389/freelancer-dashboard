@@ -3,6 +3,7 @@ import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from 
 import { db } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import { orderBy } from "firebase/firestore";
+import toast, { Toaster } from "react-hot-toast";
 
 function IncomeList() {
   const { currentUser } = useAuth();
@@ -44,7 +45,9 @@ function IncomeList() {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    
+
+    if (!window.confirm("Apply changes?")) return;
+
      if (!editForm.amount || editForm.amount <= 0) {
      return alert("Amount must be greater than 0");
     }
@@ -59,10 +62,12 @@ function IncomeList() {
         date: editForm.date,
         description: editForm.description,
       });
+      toast.success("Income updated!");
       setEditingId(null);
       setEditForm({ amount: "", platform: "", date: "", description: "" });
     } catch (err) {
       console.error("Update failed:", err);
+      toast.error("Update failed: " + err.message);
     }
   };
 
@@ -70,6 +75,7 @@ function IncomeList() {
     if (window.confirm("Are you sure you want to delete this record?")) {
       try {
         await deleteDoc(doc(db, "incomes", id));
+        toast.success("Income deleted!");
       } catch (err) {
         console.error("Delete failed:", err);
       }
@@ -83,6 +89,7 @@ function IncomeList() {
 
   return (
     <div className="mt-6">
+      <Toaster position="top-center" />
       <h3 className="text-lg font-bold mb-4">Income Records</h3>
       <div className="bg-white rounded-lg shadow-md overflow-x-auto">
         <table className="min-w-full">
