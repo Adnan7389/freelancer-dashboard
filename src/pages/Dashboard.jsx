@@ -3,6 +3,7 @@ import IncomeForm from "../components/IncomeForm";
 import IncomeList from "../components/IncomeList";
 import AnalyticsSummary from "../components/AnalyticsSummary";
 import IncomeChart from "../components/IncomeChart";
+import IncomePieChart from "../components/IncomePieChart";
 
 function Dashboard() {
   const { currentUser } = useAuth();
@@ -13,6 +14,7 @@ function Dashboard() {
       <p>This is your Freelancer Dashboard.</p>
       <div className="max-w-2xl mx-auto">
         <AnalyticsSummary />
+        <IncomePieChart/>
         <IncomeChart />
         <IncomeForm />
         <IncomeList />
