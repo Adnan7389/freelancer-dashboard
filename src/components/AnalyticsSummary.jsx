@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../context/AuthContext";
+import SummaryCard from "./SummaryCard";
 
 function AnalyticsSummary() {
   const { currentUser } = useAuth();
@@ -23,13 +24,15 @@ function AnalyticsSummary() {
       const incomes = snapshot.docs.map((doc) => doc.data());
       const totalIncome = incomes.reduce((sum, income) => sum + income.amount, 0);
       const averageIncome = incomes.length ? totalIncome / incomes.length : 0;
-      const byPlatform = incomes.reduce(
-        (acc, income) => ({
-          ...acc,
-          [income.platform]: (acc[income.platform] || 0) + income.amount,
-        }),
-        { Fiverr: 0, Upwork: 0, Other: 0 }
-      );
+      const byPlatform = incomes.reduce((acc, income) => {
+        acc[income.platform] = (acc[income.platform] || 0) + income.amount;
+               return acc;
+        }, {});
+
+        const platformPercentages = {};
+         Object.entries(byPlatform).forEach(([platform, amount]) => {
+          platformPercentages[platform] = (amount / totalIncome) * 100;
+        });
 
       setSummary({ totalIncome, averageIncome, byPlatform });
     });
@@ -38,26 +41,25 @@ function AnalyticsSummary() {
   }, [currentUser]);
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-      <h3 className="text-lg font-bold mb-4">Income Summary</h3>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 bg-blue-100 rounded-lg">
-          <h4 className="text-gray-700">Total Income</h4>
-          <p className="text-2xl font-bold">${summary.totalIncome.toFixed(2)}</p>
-        </div>
-        <div className="p-4 bg-green-100 rounded-lg">
-          <h4 className="text-gray-700">Average Income</h4>
-          <p className="text-2xl font-bold">${summary.averageIncome.toFixed(2)}</p>
-        </div>
-        <div className="p-4 bg-purple-100 rounded-lg">
-          <h4 className="text-gray-700">By Platform</h4>
-          <ul>
-            <li>Fiverr: ${summary.byPlatform.Fiverr.toFixed(2)}</li>
-            <li>Upwork: ${summary.byPlatform.Upwork.toFixed(2)}</li>
-            <li>Other: ${summary.byPlatform.Other.toFixed(2)}</li>
-          </ul>
-        </div>
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <SummaryCard title="Total Income" bg="bg-blue-100">
+        ${summary.totalIncome.toFixed(2)}
+      </SummaryCard>
+      <SummaryCard title="Average Income" bg="bg-green-100">
+        ${summary.averageIncome.toFixed(2)}
+      </SummaryCard>
+      <SummaryCard title="By Platform" bg="bg-purple-100">
+        <ul>
+          {Object.entries(summary.byPlatform).map(([platform, amount]) => {
+            const percent = (amount / summary.totalIncome) * 100;
+            return (
+              <li key={platform}>
+                {platform}: ${amount.toFixed(2)} ({percent.toFixed(1)}%)
+              </li>
+            );
+          })}
+        </ul>
+      </SummaryCard>
     </div>
   );
 }
