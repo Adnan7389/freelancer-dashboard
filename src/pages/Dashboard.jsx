@@ -2,6 +2,7 @@ import { useAuth } from "../context/AuthContext";
 import IncomeForm from "../components/IncomeForm";
 import IncomeList from "../components/IncomeList";
 import AnalyticsSummary from "../components/AnalyticsSummary";
+import IncomeChart from "../components/IncomeChart";
 
 function Dashboard() {
   const { currentUser } = useAuth();
@@ -12,6 +13,7 @@ function Dashboard() {
       <p>This is your Freelancer Dashboard.</p>
       <div className="max-w-2xl mx-auto">
         <AnalyticsSummary />
+        <IncomeChart />
         <IncomeForm />
         <IncomeList />
       </div>
