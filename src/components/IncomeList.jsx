@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../firebase";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import { orderBy } from "firebase/firestore";
 import toast, { Toaster } from "react-hot-toast";
 import IncomeRow from "./IncomeRow";

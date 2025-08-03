@@ -1,4 +1,4 @@
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import IncomeForm from "../components/IncomeForm";
 import IncomeList from "../components/IncomeList";
 import AnalyticsSummary from "../components/AnalyticsSummary";
