@@ -18,6 +18,7 @@ const incomeSchema = z.object({
       message: "Date cannot be in the future",
     }),
   description: z.string().optional(),
+  client: z.string().optional(),
 });
 
 function IncomeForm() {
@@ -43,6 +44,7 @@ function IncomeForm() {
         platform: data.platform,
         date: data.date,
         description: data.description,
+        client: data.client || "",
         createdAt: serverTimestamp(),
       });
 
@@ -93,6 +95,16 @@ function IncomeForm() {
           {errors.date && (
             <p className="text-red-500 text-sm">{errors.date.message}</p>
           )}
+        </div>
+
+        {/* Client Name */}
+        <div className="mb-4">
+          <label className="block text-gray-700">Client Name (Optional)</label>
+          <input
+            type="text"
+            {...register("client")}
+            className="w-full p-2 border rounded"
+          />
         </div>
 
         {/* Description */}
