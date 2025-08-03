@@ -24,7 +24,7 @@ function Navbar() {
       <div>
         {currentUser ? (
           <>
-            <span className="mr-4">Hello, {currentUser.email}</span>
+            <span className="mr-4">Hello, {currentUser.name}</span>
             <button
               onClick={handleLogout}
               className="bg-red-500 px-4 py-2 rounded hover:bg-red-600"

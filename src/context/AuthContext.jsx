@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
 const AuthContext = createContext();
 
@@ -9,15 +11,22 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, (user) => {
-    try {
-      setCurrentUser(user);
-    } catch (error) {
-      console.error("Auth state error:", error);
-    } finally {
-      setLoading(false);
+  const unsubscribe = onAuthStateChanged(auth, async (user) => {
+  try {
+    if (user) {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const userData = userDoc.exists() ? userDoc.data() : {};
+      setCurrentUser({ ...user, ...userData }); // Merge auth + profile
+    } else {
+      setCurrentUser(null);
     }
-  });
+  } catch (error) {
+    console.error("Auth state error:", error);
+  } finally {
+    setLoading(false);
+  }
+});
+
   return unsubscribe;
 }, []);
 

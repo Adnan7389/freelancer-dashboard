@@ -9,6 +9,9 @@ function AuthForm({ mode = "login", onSubmit }) {
   const [serverError, setServerError] = useState("");
 
   const schema = z.object({
+    name: mode === "signup"
+    ? z.string().min(2, "Name is required")
+    : z.string().optional(),
     email: z.string().email("Please enter a valid email."),
     password: z.string().min(6, "Password must be at least 6 characters."),
     confirmPassword: mode === "signup"
@@ -36,7 +39,7 @@ function AuthForm({ mode = "login", onSubmit }) {
     setServerError("");
 
     try {
-      await onSubmit(data.email, data.password);
+      await onSubmit(data.email, data.password, data.name);
     } catch (err) {
       setServerError(err.message);
     }
@@ -50,6 +53,20 @@ function AuthForm({ mode = "login", onSubmit }) {
         </h2>
         {serverError && <p className="text-red-500 mb-4 text-center">{serverError}</p>}
         <form onSubmit={handleSubmit(handleFormSubmit)} noValidate>
+          {/* Name */}
+          {mode === "signup" && (
+            <div className="mb-4">
+              <label className="block text-gray-700">Name</label>
+              <input
+                type="text"
+                {...register("name")}
+                className="w-full p-2 border rounded"
+              />
+              {errors.name && (
+                <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+              )}
+            </div>
+          )}
           {/* Email */}
           <div className="mb-4">
             <label className="block text-gray-700">Email</label>
