@@ -1,5 +1,7 @@
 import { useAuth } from "../hooks/useAuth";
 import { Link } from "react-router-dom";
+import Logo from "./Logo"; // adjust path as needed
+
 
 
 function Navbar() {
@@ -8,18 +10,18 @@ function Navbar() {
   return (
     <nav className="bg-blue-700 p-4 text-white shadow-md">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-        <Link 
-          to="/" 
-          className="text-xl font-bold hover:text-blue-100 transition-colors"
-        >
-          Freelancer Dashboard
-        </Link>
+        <Link to="/dashboard" className="flex items-center gap-2">
+         <Logo size={36} />
+         <span className="text-lg sm:text-xl font-semibold tracking-tight text-white hidden sm:inline">
+         Freelancer Dashboard
+         </span>
+       </Link>
         
         <div className="flex items-center gap-4">
           {currentUser ? (
             <>
               <span className="hidden sm:inline text-blue-100">
-                Hello, {currentUser.name}
+                {/* Hello, {currentUser.name} */}
               </span>
               
             </>
