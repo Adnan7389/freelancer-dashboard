@@ -12,10 +12,6 @@ import PlatformTrendsTable from "../components/PlatformTrendsTable";
 import {
   FiMenu,
   FiX,
-  FiPlus,
-  FiSettings,
-  FiLogOut,
-  FiUser,
 } from "react-icons/fi";
 import Sidebar from "../components/Sidebar";
 

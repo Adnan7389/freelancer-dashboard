@@ -2,7 +2,7 @@ import { FiPlus, FiSettings, FiLogOut, FiUser } from "react-icons/fi";
 import { Link} from "react-router-dom";
 import { FaMoneyBillWave } from "react-icons/fa";
 
-function Sidebar({ currentUser, showForm, setShowForm, sidebarOpen, setSidebarOpen, onLogout }) {
+function Sidebar({ currentUser, setShowForm, sidebarOpen, setSidebarOpen, onLogout }) {
   return (
     <div className={`sidebar ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 left-0 w-72 bg-white shadow-xl lg:shadow-none z-20 transition-transform duration-300 ease-in-out`}>
   <div className="h-full flex flex-col p-4 space-y-6">
