@@ -26,13 +26,8 @@ function AnalyticsSummary() {
       const averageIncome = incomes.length ? totalIncome / incomes.length : 0;
       const byPlatform = incomes.reduce((acc, income) => {
         acc[income.platform] = (acc[income.platform] || 0) + income.amount;
-               return acc;
-        }, {});
-
-        const platformPercentages = {};
-         Object.entries(byPlatform).forEach(([platform, amount]) => {
-          platformPercentages[platform] = (amount / totalIncome) * 100;
-        });
+        return acc;
+      }, { Fiverr: 0, Upwork: 0, Other: 0 });
 
       setSummary({ totalIncome, averageIncome, byPlatform });
     });
@@ -41,20 +36,32 @@ function AnalyticsSummary() {
   }, [currentUser]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <SummaryCard title="Total Income" bg="bg-blue-100">
-        ${summary.totalIncome.toFixed(2)}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+      <SummaryCard title="Total Income" bg="bg-blue-50">
+        <div className="text-gray-800 text-xl md:text-2xl font-semibold">
+          ${summary.totalIncome.toFixed(2)}
+        </div>
       </SummaryCard>
-      <SummaryCard title="Average Income" bg="bg-green-100">
-        ${summary.averageIncome.toFixed(2)}
+
+      <SummaryCard title="Average Income" bg="bg-green-50">
+        <div className="text-gray-800 text-xl md:text-2xl font-semibold">
+          ${summary.averageIncome.toFixed(2)}
+        </div>
       </SummaryCard>
-      <SummaryCard title="By Platform" bg="bg-purple-100">
-        <ul>
+
+      <SummaryCard title="By Platform" bg="bg-purple-50">
+        <ul className="space-y-1 text-sm text-gray-700">
           {Object.entries(summary.byPlatform).map(([platform, amount]) => {
-            const percent = (amount / summary.totalIncome) * 100;
+            const percent = (amount / summary.totalIncome) * 100 || 0;
             return (
-              <li key={platform}>
-                {platform}: ${amount.toFixed(2)} ({percent.toFixed(1)}%)
+              <li key={platform} className="flex justify-between">
+                <span>{platform}</span>
+                <span className="text-right font-medium text-gray-800">
+                  ${amount.toFixed(2)}{" "}
+                  <span className="text-gray-500 text-xs">
+                    ({percent.toFixed(1)}%)
+                  </span>
+                </span>
               </li>
             );
           })}

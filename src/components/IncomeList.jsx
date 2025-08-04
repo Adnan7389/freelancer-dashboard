@@ -81,34 +81,57 @@ function IncomeList() {
   return (
     <div className="mt-6">
       <Toaster position="top-center" />
-      <h3 className="text-lg font-bold mb-4">Income Records</h3>
-      <div className="bg-white rounded-lg shadow-md overflow-x-auto">
-        <table className="min-w-full">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-2 text-left">Amount ($)</th>
-              <th className="p-2 text-left">Platform</th>
-              <th className="p-2 text-left">Date</th>
-              <th className="p-2 text-left">Description</th>
-              <th className="p-2 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {incomes.map((income) => (
-              <IncomeRow
-                key={income.id}
-                income={income}
-                editingId={editingId}
-                setEditingId={setEditingId}
-                editForm={editForm}
-                setEditForm={setEditForm}
-                handleUpdate={handleUpdate}
-                handleDelete={handleDelete}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <h3 className="text-lg font-bold text-gray-800 mb-4">Income Records</h3>
+      
+      {loading ? (
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      ) : incomes.length === 0 ? (
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center text-gray-500">
+          No income records found.
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Platform
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Description
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {incomes.map((income) => (
+                  <IncomeRow
+                    key={income.id}
+                    income={income}
+                    editingId={editingId}
+                    setEditingId={setEditingId}
+                    editForm={editForm}
+                    setEditForm={setEditForm}
+                    handleUpdate={handleUpdate}
+                    handleDelete={handleDelete}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

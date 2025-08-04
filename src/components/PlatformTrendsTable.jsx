@@ -61,32 +61,47 @@ function PlatformTrendsTable() {
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md mb-6 overflow-x-auto">
-      <h3 className="text-lg font-bold mb-4">Platform Trends by Month</h3>
-      <table className="min-w-full table-auto">
-        <thead className="bg-gray-100 text-left">
-          <tr>
-            <th className="p-2">Month</th>
-            {data.platforms.map((platform) => (
-              <th key={platform} className="p-2">
-                {platform}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.rows.map((row) => (
-            <tr key={row.month} className="border-t">
-              <td className="p-2 font-medium">{row.month}</td>
-              {data.platforms.map((platform) => (
-                <td key={platform} className="p-2">
-                  {row[platform] > 0 ? `$${row[platform].toFixed(2)}` : "-"}
-                </td>
+    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+      <h3 className="text-lg font-bold text-gray-800 mb-4">Platform Trends by Month</h3>
+      
+      {!data?.rows?.length ? (
+        <p className="text-gray-500 py-4 text-center">No income trends to display.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Month
+                </th>
+                {data.platforms.map((platform) => (
+                  <th key={platform} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {platform}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {data.rows.map((row) => (
+                <tr key={row.month} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900">
+                    {row.month}
+                  </td>
+                  {data.platforms.map((platform) => (
+                    <td key={platform} className="px-4 py-3 whitespace-nowrap">
+                      {row[platform] > 0 ? (
+                        <span className="font-medium">${row[platform].toFixed(2)}</span>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
               ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

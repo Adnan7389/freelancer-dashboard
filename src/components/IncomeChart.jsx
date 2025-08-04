@@ -97,33 +97,58 @@ function IncomeChart() {
   }, [currentUser, groupBy]);
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-      <div className="mb-4">
-         <label className="mr-2 font-medium text-gray-700">Group By:</label>
-         <select
-            value={groupBy}
-            onChange={(e) => setGroupBy(e.target.value)}
-            className="p-2 border rounded"
-         >
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-         </select>
+    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+  <h3 className="text-lg font-bold text-gray-800">Income Trend</h3>
+  <div className="flex items-center">
+    <label htmlFor="groupBy" className="mr-2 text-sm font-medium text-gray-700">Group By:</label>
+    <select
+      id="groupBy"
+      value={groupBy}
+      onChange={(e) => setGroupBy(e.target.value)}
+      className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      <option value="daily">Daily</option>
+      <option value="weekly">Weekly</option>
+      <option value="monthly">Monthly</option>
+    </select>
+  </div>
+</div>
+
+      
+      <div className="h-64 md:h-80">
+        <Line
+          data={chartData}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: "top" },
+              tooltip: {
+                mode: "index",
+                intersect: false,
+              },
+            },
+            interaction: {
+              mode: "nearest",
+              axis: "x",
+              intersect: false,
+            },
+            scales: {
+              y: { 
+                beginAtZero: true,
+                grid: { color: "rgba(0, 0, 0, 0.05)" },
+                ticks: { 
+                  callback: (value) => `$${value}` 
+                }
+              },
+              x: { 
+                grid: { display: false },
+              },
+            },
+          }}
+        />
       </div>
-      <Line
-        data={chartData}
-        options={{
-          responsive: true,
-          plugins: {
-            legend: { position: "top" },
-            title: { display: true, text: "Daily Income Trend" },
-          },
-          scales: {
-            y: { beginAtZero: true, title: { display: true, text: "Amount ($)" } },
-            x: { title: { display: true, text: "Date" } },
-          },
-        }}
-      />
     </div>
   );
 }

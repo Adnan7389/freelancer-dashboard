@@ -63,27 +63,40 @@ function IncomePieChart() {
   }, [currentUser]);
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-      <h3 className="text-lg font-bold mb-4">Income by Platform</h3>
-      <Pie
-        data={platformData}
-        options={{
-          responsive: true,
-          plugins: {
-            legend: { position: "right" },
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  const value = context.raw;
-                  const total = context.chart._metasets[0].total;
-                  const percent = ((value / total) * 100).toFixed(1);
-                  return `${context.label}: $${value.toFixed(2)} (${percent}%)`;
+    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-bold text-gray-800">Income by Platform</h3>
+      </div>
+      
+      <div className="h-64 md:h-80">
+        <Pie
+          data={platformData}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { 
+                position: window.innerWidth < 768 ? "bottom" : "right",
+                labels: {
+                  padding: 20,
+                  usePointStyle: true,
+                  pointStyle: "circle"
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    const value = context.raw;
+                    const total = context.chart._metasets[0].total;
+                    const percent = ((value / total) * 100).toFixed(1);
+                    return `${context.label}: $${value.toFixed(2)} (${percent}%)`;
+                  },
                 },
               },
             },
-          },
-        }}
-      />
+          }}
+        />
+      </div>
     </div>
   );
 }
