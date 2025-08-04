@@ -11,7 +11,9 @@ const incomeSchema = z.object({
   amount: z
     .number({ invalid_type_error: "Amount is required" })
     .positive("Amount must be greater than 0"),
-  platform: z.string(),
+  platform: z
+    .string()
+    .min(2, "Platform name must be at least 2 characters"),
   date: z
     .string()
     .refine((date) => new Date(date) <= new Date(), {
@@ -76,13 +78,17 @@ function IncomeForm() {
 
         {/* Platform */}
         <div className="mb-4">
-          <label className="block text-gray-700">Platform</label>
-          <select {...register("platform")} className="w-full p-2 border rounded">
-            <option value="Fiverr">Fiverr</option>
-            <option value="Upwork">Upwork</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
+           <label className="block text-gray-700">Platform</label>
+           <input
+             type="text"
+             {...register("platform")}
+             className="w-full p-2 border rounded"
+             placeholder="e.g., Fiverr, Upwork, Client Direct"
+           />
+           {errors.platform && (
+             <p className="text-red-500 text-sm">{errors.platform.message}</p>
+           )}
+         </div>
 
         {/* Date */}
         <div className="mb-4">
