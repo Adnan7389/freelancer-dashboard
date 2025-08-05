@@ -5,7 +5,7 @@ import Home from "./pages/Home";
 import Login from "./pages/LoginPage";
 import Signup from "./pages/SignupPage";
 import Dashboard from "./pages/Dashboard";
-
+import SettingsPage from "./pages/SettingsPage";
 function App() {
   return (
     <Router>
@@ -23,6 +23,14 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/dashboard/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            }
+         />
         </Routes>
       </div>
     </Router>
