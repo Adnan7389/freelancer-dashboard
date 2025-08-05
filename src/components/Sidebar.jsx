@@ -41,10 +41,13 @@ function Sidebar({ currentUser, setShowForm, sidebarOpen, setSidebarOpen, onLogo
 
     {/* Settings + Logout */}
     <div className="mt-auto space-y-2 border-t pt-4">
-      <button className="w-full flex items-center gap-3 text-gray-700 hover:bg-gray-100 px-4 py-2.5 rounded-lg">
-        <FiSettings size={20} />
-        Settings
-      </button>
+      <Link
+        to="/dashboard/settings"
+        className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
+        >
+        ⚙️ Settings
+      </Link>
+
       <button
         onClick={onLogout}
         className="w-full flex items-center gap-3 text-gray-700 hover:bg-gray-100 px-4 py-2.5 rounded-lg"
