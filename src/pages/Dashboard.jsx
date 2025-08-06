@@ -14,6 +14,7 @@ import {
   FiX,
 } from "react-icons/fi";
 import Sidebar from "../components/Sidebar";
+import IncomeDataTools from "../components/IncomeDataTools";
 
 
 function Dashboard() {
@@ -98,6 +99,7 @@ function Dashboard() {
           </div>
 
           <PlatformTrendsTable />
+          <IncomeDataTools />
           <IncomeList />
         </div>
       </div>
