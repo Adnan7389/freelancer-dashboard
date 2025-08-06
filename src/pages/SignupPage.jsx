@@ -16,6 +16,7 @@ function Signup() {
   await setDoc(doc(db, "users", user.uid), {
     name,
     email,
+     plan: "free", 
     createdAt: new Date().toISOString(),
   });
 

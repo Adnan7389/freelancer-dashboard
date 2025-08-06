@@ -1,10 +1,11 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, query, where  } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
 import toast, { Toaster } from "react-hot-toast";
+import { useProStatus } from "../hooks/useProStatus";
 
 // Validation schema
 const incomeSchema = z.object({
@@ -25,6 +26,7 @@ const incomeSchema = z.object({
 
 function IncomeForm() {
   const { currentUser } = useAuth();
+  const isPro = useProStatus();
 
   const {
     register,
@@ -39,7 +41,20 @@ function IncomeForm() {
   });
 
   const onSubmit = async (data) => {
+
     try {
+
+      const q = query(
+      collection(db, "incomes"),
+      where("userId", "==", currentUser.uid)
+     );
+
+     const snapshot = await getDocs(q);
+
+      if (!isPro && snapshot.docs.length >= 50) {
+      return toast.error("Free plan limit reached. Upgrade to add more.");
+     }
+
       await addDoc(collection(db, "incomes"), {
         userId: currentUser.uid,
         amount: data.amount,
@@ -50,7 +65,7 @@ function IncomeForm() {
         createdAt: serverTimestamp(),
       });
 
-      toast.success("Income added!");
+       toast.success("Income added!");
       reset();
     } catch (err) {
       toast.error("Failed to add income: " + err.message);
