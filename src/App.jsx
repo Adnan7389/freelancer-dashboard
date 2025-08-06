@@ -6,11 +6,13 @@ import Login from "./pages/LoginPage";
 import Signup from "./pages/SignupPage";
 import Dashboard from "./pages/Dashboard";
 import SettingsPage from "./pages/SettingsPage";
+import { Toaster } from "react-hot-toast";
 function App() {
   return (
     <Router>
       <div className="w-full min-h-screen bg-gray-100">
         <Navbar />
+        <Toaster position="top-right" reverseOrder={false} />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
