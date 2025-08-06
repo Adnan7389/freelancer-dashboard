@@ -25,7 +25,14 @@ function Settings() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
 
-  const currentUser = auth.currentUser;
+  const [currentUser, setCurrentUser] = useState(null);
+
+    useEffect(() => {
+      const unsubscribe = auth.onAuthStateChanged((user) => {
+        setCurrentUser(user);
+      });
+      return () => unsubscribe();
+    }, []);
 
   useEffect(() => {
     if (currentUser?.uid) {
@@ -42,6 +49,11 @@ function Settings() {
   }, [currentUser]);
 
   const handleUpdateName = async () => {
+    if (!currentUser || !currentUser.email) {
+    toast.error("Session expired. Please log in again.");
+    return;
+  }
+
     if (!name.trim()) return toast.error("Name cannot be empty");
     if (name === initialName) return toast("No changes to save");
     setLoading(true);
@@ -57,6 +69,12 @@ function Settings() {
   };
 
   const handleChangePassword = async () => {
+    
+    if (!currentUser || !currentUser.email) {
+     toast.error("Session expired. Please log in again.");
+     return;
+  }
+
     if (!currentPassword || !newPassword || !confirmPassword) {
       return toast.error("All password fields are required");
     }
@@ -88,6 +106,11 @@ function Settings() {
   };
 
   const handleDeleteAccount = async () => {
+    if (!currentUser || !currentUser.email) {
+    toast.error("Session expired. Please log in again.");
+    return;
+    }
+
     if (!deletePassword) {
       return toast.error("Password required to delete account");
     }
