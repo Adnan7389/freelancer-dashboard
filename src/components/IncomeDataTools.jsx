@@ -16,7 +16,7 @@ function IncomeDataTools() {
       await exportIncomesToCSV(currentUser.uid);
       toast.success("Exported to CSV!");
     } catch (err) {
-      toast.error("Export failed.");
+      toast.error("Something went wrong: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -30,7 +30,7 @@ function IncomeDataTools() {
       await importCSVToIncomes(file, currentUser.uid);
       toast.success("Imported successfully!");
     } catch (err) {
-      toast.error("Import failed.");
+      toast.error("Something went wrong: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -39,24 +39,35 @@ function IncomeDataTools() {
   if (!isPro) return null;
 
   return (
-    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">📂 Import & Export</h3>
+    <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 space-y-4">
+      <div>
+        <h3 className="text-xl font-semibold text-gray-800 mb-1">📁 Income Data Tools</h3>
+        <p className="text-sm text-gray-600">
+          Export your income records to a CSV file or import from Fiverr/Upwork reports.
+        </p>
+      </div>
+
       <div className="flex flex-col sm:flex-row gap-4">
+        {/* Export Button */}
         <button
           onClick={handleExport}
           disabled={loading}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+          className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md transition"
         >
-          <FiDownload /> Export CSV
+          <FiDownload size={18} />
+          Export to CSV
         </button>
 
-        <label className="flex items-center gap-2 cursor-pointer bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-          <FiUpload /> Import CSV
+        {/* Import File Input */}
+        <label className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md cursor-pointer transition">
+          <FiUpload size={18} />
+          Import CSV
           <input
             type="file"
             accept=".csv"
             onChange={handleImport}
             className="hidden"
+            aria-label="Upload CSV file"
           />
         </label>
       </div>
