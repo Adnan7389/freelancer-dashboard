@@ -23,6 +23,12 @@ function Sidebar({ currentUser, setShowForm, sidebarOpen, setSidebarOpen, onLogo
         <FiUser size={20} />
         Clients (soon)
       </button>
+      <Link
+        to="/income-records"
+        className="w-full flex items-center gap-3 text-gray-700 hover:bg-gray-100 px-4 py-2.5 rounded-lg transition-colors"
+      >
+        <span>📊</span> Income Records
+      </Link>
     </div>
 
     {/* Action buttons */}

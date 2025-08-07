@@ -6,6 +6,7 @@ import Login from "./pages/LoginPage";
 import Signup from "./pages/SignupPage";
 import Dashboard from "./pages/Dashboard";
 import SettingsPage from "./pages/SettingsPage";
+import IncomeRecords from "./pages/IncomeRecords";
 import { Toaster } from "react-hot-toast";
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
               </ProtectedRoute>
             }
          />
+         <Route path="/income-records" element={<ProtectedRoute><IncomeRecords /></ProtectedRoute>} />
         </Routes>
       </div>
     </Router>

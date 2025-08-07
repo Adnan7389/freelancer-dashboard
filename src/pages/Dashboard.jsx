@@ -4,7 +4,6 @@ import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
 import { Link, useNavigate } from "react-router-dom";
 import IncomeForm from "../components/IncomeForm";
-import IncomeList from "../components/IncomeList";
 import AnalyticsSummary from "../components/AnalyticsSummary";
 import IncomeChart from "../components/IncomeChart";
 import IncomePieChart from "../components/IncomePieChart";
@@ -100,7 +99,6 @@ function Dashboard() {
 
           <PlatformTrendsTable />
           <IncomeDataTools />
-          <IncomeList />
         </div>
       </div>
 
