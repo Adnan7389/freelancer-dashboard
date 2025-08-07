@@ -79,6 +79,7 @@ function IncomeDataTools() {
 
         setRecordCount(filtered.length);
       } catch (err) {
+         console.error("Failed to fetch record count:", err);
         setRecordCount(null);
       }
     };
