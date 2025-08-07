@@ -11,6 +11,7 @@ import PlatformTrendsTable from "../components/PlatformTrendsTable";
 import {
   FiMenu,
   FiX,
+  FiPlus,
 } from "react-icons/fi";
 import Sidebar from "../components/Sidebar";
 import IncomeDataTools from "../components/IncomeDataTools";
@@ -86,8 +87,13 @@ function Dashboard() {
             <FiMenu size={24} />
           </button>
         </div>
-
         <div className="space-y-6">
+          <button
+           onClick={() => setShowForm(true)}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+          >
+            <FiPlus size={18} /> Add Income
+          </button>       
           <div className="border-t border-gray-200 pt-4">
             <AnalyticsSummary />
           </div>
