@@ -38,7 +38,14 @@ function Sidebar({ currentUser,  sidebarOpen, onLogout }) {
         >
         ⚙️ Settings
       </Link>
-
+      <a
+        href="https://trackmyincome.lemonsqueezy.com/buy/fc8795bb-8bc2-483e-badf-a2b2afcfdd30"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block mt-4 bg-yellow-500 text-white font-semibold py-2 px-4 rounded hover:bg-yellow-600 transition"
+      >
+        🚀 Upgrade to Pro
+      </a>
       <button
         onClick={onLogout}
         className="w-full flex items-center gap-3 text-gray-700 hover:bg-gray-100 px-4 py-2.5 rounded-lg"
