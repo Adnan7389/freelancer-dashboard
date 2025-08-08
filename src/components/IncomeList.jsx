@@ -5,6 +5,7 @@ import { useAuth } from "../hooks/useAuth";
 import { orderBy } from "firebase/firestore";
 import toast, { Toaster } from "react-hot-toast";
 import IncomeRow from "./IncomeRow";
+import { FiDollarSign, FiCalendar, FiLayers, FiFileText, FiTrash2, FiEdit2, FiCheck, FiX } from "react-icons/fi";
 
 function IncomeList() {
   const { currentUser } = useAuth();
@@ -39,11 +40,13 @@ function IncomeList() {
 
     if (!window.confirm("Apply changes?")) return;
 
-     if (!editForm.amount || editForm.amount <= 0) {
-     return alert("Amount must be greater than 0");
+    if (!editForm.amount || editForm.amount <= 0) {
+      toast.error("Amount must be greater than 0");
+      return;
     }
     if (!editForm.date || new Date(editForm.date) > new Date()) {
-      return alert("Date cannot be in the future");
+      toast.error("Date cannot be in the future");
+      return;
     }
 
     try {
@@ -53,7 +56,7 @@ function IncomeList() {
         date: editForm.date,
         description: editForm.description,
       });
-      toast.success("Income updated!");
+      toast.success("Income updated successfully!");
       setEditingId(null);
       setEditForm({ amount: "", platform: "", date: "", description: "" });
     } catch (err) {
@@ -66,30 +69,49 @@ function IncomeList() {
     if (window.confirm("Are you sure you want to delete this record?")) {
       try {
         await deleteDoc(doc(db, "incomes", id));
-        toast.success("Income deleted!");
+        toast.success("Income deleted successfully!");
       } catch (err) {
         console.error("Delete failed:", err);
+        toast.error("Delete failed: " + err.message);
       }
     }
   };
-  if (loading) return <p className="text-gray-500">Loading incomes...</p>;
-  
-  if (incomes.length === 0) {
-    return <p className="text-gray-500">No income records found.</p>;
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
 
   return (
     <div className="mt-6">
-      <Toaster position="top-center" />
-      <h3 className="text-lg font-bold text-gray-800 mb-4">Income Records</h3>
-      
-      {loading ? (
-        <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+      <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-xl font-bold text-gray-800 flex items-center">
+          <FiDollarSign className="mr-2 text-blue-500" />
+          Income Records
+        </h3>
+        <div className="text-sm text-gray-500">
+          {incomes.length} {incomes.length === 1 ? 'record' : 'records'} found
         </div>
-      ) : incomes.length === 0 ? (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center text-gray-500">
-          No income records found.
+      </div>
+      
+      {incomes.length === 0 ? (
+        <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
+          <div className="text-gray-400 mb-4">
+            <FiDollarSign className="mx-auto text-4xl" />
+          </div>
+          <h4 className="text-lg font-medium text-gray-700 mb-2">No income records yet</h4>
+          <p className="text-gray-500">Add your first income record to get started</p>
         </div>
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -97,19 +119,31 @@ function IncomeList() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Amount
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div className="flex items-center">
+                      <FiDollarSign className="mr-2" />
+                      Amount
+                    </div>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Platform
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div className="flex items-center">
+                      <FiLayers className="mr-2" />
+                      Platform
+                    </div>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div className="flex items-center">
+                      <FiCalendar className="mr-2" />
+                      Date
+                    </div>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Description
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div className="flex items-center">
+                      <FiFileText className="mr-2" />
+                      Description
+                    </div>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -125,6 +159,7 @@ function IncomeList() {
                     setEditForm={setEditForm}
                     handleUpdate={handleUpdate}
                     handleDelete={handleDelete}
+                    formatCurrency={formatCurrency}
                   />
                 ))}
               </tbody>
