@@ -6,12 +6,21 @@ import {
   EmailAuthProvider,
   deleteUser,
 } from "firebase/auth";
-import {
-  doc,
-  getDoc,
-  updateDoc,
-} from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
+import {
+  FiUser,
+  FiMail,
+  FiLock,
+  FiEdit2,
+  FiCheck,
+  FiX,
+  FiShield,
+  FiAlertTriangle,
+  FiClock,
+  FiTrash2,
+  FiLoader
+} from "react-icons/fi";
 
 function Settings() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -67,7 +76,7 @@ function Settings() {
       await updateDoc(doc(db, "users", currentUser.uid), { name });
       setInitialName(name);
       setEditingName(false);
-      toast.success("Name updated successfully.");
+      toast.success("Name updated successfully!");
     } catch (err) {
       console.error(err);
       toast.error("Failed to update name.");
@@ -84,10 +93,10 @@ function Settings() {
       return toast.error("All fields are required.");
     }
     if (newPassword !== confirmPassword) {
-      return toast.error("Passwords do not match.");
+      return toast.error("Passwords don't match.");
     }
     if (newPassword.length < 6) {
-      return toast.error("Password too short.");
+      return toast.error("Password must be at least 6 characters.");
     }
 
     setPasswordLoading(true);
@@ -98,7 +107,7 @@ function Settings() {
       );
       await reauthenticateWithCredential(currentUser, credential);
       await updatePassword(currentUser, newPassword);
-      toast.success("Password changed.");
+      toast.success("Password changed successfully!");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -127,7 +136,7 @@ function Settings() {
       );
       await reauthenticateWithCredential(currentUser, credential);
       await deleteUser(currentUser);
-      toast.success("Account deleted.");
+      toast.success("Account deleted successfully!");
     } catch (err) {
       console.error(err);
       toast.error(err.message || "Failed to delete account.");
@@ -140,103 +149,147 @@ function Settings() {
   ).toLocaleString();
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white shadow rounded-lg mt-10 space-y-10">
-      <h2 className="text-2xl font-semibold text-gray-800">Account Settings</h2>
+    <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-sm border border-gray-100 mt-10 space-y-8">
+      <div className="flex items-center gap-3 mb-6">
+        <FiUser className="text-2xl text-blue-500" />
+        <h2 className="text-2xl font-bold text-gray-800">Account Settings</h2>
+      </div>
 
-      {/* Email */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+      {/* Email Section */}
+      <div className="space-y-1">
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <FiMail /> Email Address
+        </label>
         <input
           type="email"
           value={currentUser?.email || ""}
           readOnly
-          className="w-full px-4 py-2 border border-gray-300 rounded bg-gray-100"
+          className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
-      {/* Name */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-        {!editingName ? (
-          <div className="flex items-center justify-between">
-            <span className="text-gray-800">{initialName || "Not set"}</span>
+      {/* Name Section */}
+      <div className="space-y-3">
+        <div className="flex justify-between items-center">
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <FiUser /> Display Name
+          </label>
+          {!editingName && (
             <button
               onClick={() => setEditingName(true)}
-              className="text-blue-600 text-sm underline"
+              className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
             >
-              Change Name
+              <FiEdit2 size={14} /> Change
             </button>
+          )}
+        </div>
+        
+        {!editingName ? (
+          <div className="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
+            <p className="text-gray-800">{initialName || "Not set"}</p>
           </div>
         ) : (
-          <>
+          <div className="space-y-3">
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded"
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter your name"
             />
-            <div className="flex gap-2 mt-2">
+            <div className="flex gap-2">
               <button
                 onClick={handleUpdateName}
                 disabled={nameSaving}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
               >
-                {nameSaving ? "Saving..." : "Save"}
+                {nameSaving ? (
+                  <>
+                    <FiLoader className="animate-spin" /> Saving...
+                  </>
+                ) : (
+                  <>
+                    <FiCheck /> Save
+                  </>
+                )}
               </button>
               <button
                 onClick={() => {
                   setName(initialName);
                   setEditingName(false);
                 }}
-                className="text-gray-600 underline"
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg transition-colors"
               >
-                Cancel
+                <FiX /> Cancel
               </button>
             </div>
-          </>
+          </div>
         )}
       </div>
 
-      {/* Change Password */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-800 mb-2">Password</h3>
-        {!changePasswordVisible ? (
-          <button
-            onClick={() => setChangePasswordVisible(true)}
-            className="text-sm text-blue-600 underline"
-          >
-            Change Password
-          </button>
-        ) : (
-          <>
-            <input
-              type="password"
-              placeholder="Current password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              className="w-full mb-2 px-4 py-2 border border-gray-300 rounded"
-            />
-            <input
-              type="password"
-              placeholder="New password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full mb-2 px-4 py-2 border border-gray-300 rounded"
-            />
-            <input
-              type="password"
-              placeholder="Confirm new password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full mb-2 px-4 py-2 border border-gray-300 rounded"
-            />
-            <div className="flex gap-2">
+      {/* Password Section */}
+      <div className="space-y-3">
+        <div className="flex justify-between items-center">
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <FiLock /> Password
+          </label>
+          {!changePasswordVisible && (
+            <button
+              onClick={() => setChangePasswordVisible(true)}
+              className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+            >
+              <FiEdit2 size={14} /> Change
+            </button>
+          )}
+        </div>
+
+        {changePasswordVisible && (
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-sm text-gray-600">Current Password</label>
+              <input
+                type="password"
+                placeholder="Enter current password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm text-gray-600">New Password</label>
+              <input
+                type="password"
+                placeholder="Enter new password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm text-gray-600">Confirm New Password</label>
+              <input
+                type="password"
+                placeholder="Confirm new password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div className="flex gap-2 pt-2">
               <button
                 onClick={handleChangePassword}
                 disabled={passwordLoading}
-                className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700"
+                className="flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition-colors"
               >
-                {passwordLoading ? "Updating..." : "Save Password"}
+                {passwordLoading ? (
+                  <>
+                    <FiLoader className="animate-spin" /> Updating...
+                  </>
+                ) : (
+                  <>
+                    <FiCheck /> Save Password
+                  </>
+                )}
               </button>
               <button
                 onClick={() => {
@@ -245,53 +298,74 @@ function Settings() {
                   setConfirmPassword("");
                   setChangePasswordVisible(false);
                 }}
-                className="text-gray-600 underline"
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg transition-colors"
               >
-                Cancel
+                <FiX /> Cancel
               </button>
             </div>
-          </>
+          </div>
         )}
       </div>
 
-      {/* Last Login Info */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-800 mb-1">Last Login</h3>
-        <p className="text-gray-600">{lastLogin} — via {navigator.userAgent}</p>
+      {/* Last Login Section */}
+      <div className="space-y-1">
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <FiClock /> Last Login
+        </label>
+        <div className="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
+          <p className="text-gray-800">{lastLogin || "Never logged in"}</p>
+        </div>
       </div>
 
-      {/* Delete Account */}
-      <div>
-        <h3 className="text-lg font-semibold text-red-600 mb-2">Delete Account</h3>
+      {/* Delete Account Section */}
+      <div className="space-y-3 pt-4 border-t border-gray-200">
+        <label className="flex items-center gap-2 text-sm font-medium text-red-600">
+          <FiAlertTriangle /> Delete Account
+        </label>
+        <p className="text-sm text-gray-600">
+          This will permanently delete your account and all associated data.
+        </p>
+        
         {!confirmDelete ? (
           <button
             onClick={() => setConfirmDelete(true)}
-            className="text-sm text-red-600 underline"
+            className="flex items-center gap-2 text-sm text-red-600 hover:text-red-800 mt-2"
           >
-            I want to permanently delete my account
+            <FiTrash2 size={14} /> Delete my account
           </button>
         ) : (
-          <div className="space-y-2">
-            <input
-              type="password"
-              placeholder="Confirm password"
-              value={deletePassword}
-              onChange={(e) => setDeletePassword(e.target.value)}
-              className="w-full px-4 py-2 border border-red-300 rounded"
-            />
-            <div className="flex justify-between items-center">
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-sm text-gray-600">Confirm Password</label>
+              <input
+                type="password"
+                placeholder="Enter your password to confirm"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                className="w-full px-4 py-2.5 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              />
+            </div>
+            <div className="flex gap-2">
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleteLoading}
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
               >
-                {deleteLoading ? "Deleting..." : "Delete Account"}
+                {deleteLoading ? (
+                  <>
+                    <FiLoader className="animate-spin" /> Deleting...
+                  </>
+                ) : (
+                  <>
+                    <FiTrash2 /> Delete Account
+                  </>
+                )}
               </button>
               <button
                 onClick={() => setConfirmDelete(false)}
-                className="text-gray-500 underline text-sm"
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg transition-colors"
               >
-                Cancel
+                <FiX /> Cancel
               </button>
             </div>
           </div>
