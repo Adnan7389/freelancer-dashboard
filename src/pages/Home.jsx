@@ -114,11 +114,11 @@ function Home() {
       <section id="about" className="bg-gray-50 py-16 scroll-mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-            About Freelancer Analytics
+            About This Project
           </h2>
           <p className="mt-4 max-w-2xl text-xl text-gray-600 mx-auto">
-            Empowering freelancers with powerful tools to track, analyze, and grow their business.
-            Our mission is to help you focus on what you do best - your work.
+            A passion project built to help freelancers track, analyze, and grow their business.
+            Focus on your work while we handle the numbers.
           </p>
         </div>
       </section>
@@ -130,25 +130,23 @@ function Home() {
             <div>
               <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">Product</h3>
               <ul className="mt-4 space-y-2">
-                <li><Link to="/features" className="text-gray-600 hover:text-blue-600">Features</Link></li>
+                <li><Link to="/#features" className="text-gray-600 hover:text-blue-600">Features</Link></li>
                 <li><Link to="/pricing" className="text-gray-600 hover:text-blue-600">Pricing</Link></li>
-                <li><Link to="/demo" className="text-gray-600 hover:text-blue-600">Demo</Link></li>
+                <li><Link to="/examples" className="text-gray-600 hover:text-blue-600">Examples</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">Resources</h3>
+              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">Help</h3>
               <ul className="mt-4 space-y-2">
-                <li><Link to="/blog" className="text-gray-600 hover:text-blue-600">Blog</Link></li>
-                <li><Link to="/help" className="text-gray-600 hover:text-blue-600">Help Center</Link></li>
-                <li><Link to="/tutorials" className="text-gray-600 hover:text-blue-600">Tutorials</Link></li>
+                <li><Link to="/faq" className="text-gray-600 hover:text-blue-600">FAQ</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">Company</h3>
+              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">Connect</h3>
               <ul className="mt-4 space-y-2">
-                <li><Link to="/about" className="text-gray-600 hover:text-blue-600">About Us</Link></li>
-                <li><Link to="/careers" className="text-gray-600 hover:text-blue-600">Careers</Link></li>
-                <li><Link to="/contact" className="text-gray-600 hover:text-blue-600">Contact Us</Link></li>
+                <li><Link to="/about" className="text-gray-600 hover:text-blue-600">About Me</Link></li>
+                <li><a href="mailto:contactme.adnan89@gmail.com" className="text-gray-600 hover:text-blue-600">Contact</a></li>
+                <li><a href="https://github.com/Adnan7389" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-blue-600">GitHub</a></li>
               </ul>
             </div>
             <div>
