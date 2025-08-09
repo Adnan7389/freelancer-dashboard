@@ -58,7 +58,7 @@ function Home() {
       </section>
 
       {/* Features Grid */}
-      <section className="bg-white py-16 sm:py-24">
+      <section id="features" className="bg-white py-16 sm:py-24 scroll-mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
@@ -91,7 +91,7 @@ function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16">
+      <section id="pricing" className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16 scroll-mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-extrabold sm:text-4xl">
             Ready to take your freelance business to the next level?
@@ -107,6 +107,19 @@ function Home() {
               Get Started for Free
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* About Section - Just before footer */}
+      <section id="about" className="bg-gray-50 py-16 scroll-mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+            About Freelancer Analytics
+          </h2>
+          <p className="mt-4 max-w-2xl text-xl text-gray-600 mx-auto">
+            Empowering freelancers with powerful tools to track, analyze, and grow their business.
+            Our mission is to help you focus on what you do best - your work.
+          </p>
         </div>
       </section>
 
