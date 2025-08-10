@@ -44,7 +44,7 @@ function IncomePieChart() {
         .sort((a, b) => b[1] - a[1]);
 
       const labels = sortedEntries.map(([platform]) => platform);
-      const data = sortedEntries.map(([ amount]) => amount);
+      const data = sortedEntries.map(([_, amount]) => amount);
 
       // Generate consistent colors based on platform names
       const platformColors = labels.map(platform => {
