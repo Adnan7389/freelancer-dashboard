@@ -84,6 +84,19 @@ function IncomeList() {
     }).format(amount);
   };
 
+  // Format platform name for display (capitalize first letter, rest lowercase)
+  const formatPlatformName = (platform) => {
+    if (!platform) return '';
+    return platform.charAt(0).toUpperCase() + platform.slice(1).toLowerCase();
+  };
+
+  // Get the display name for a platform (prefer displayPlatform, fallback to platform field)
+  const getDisplayPlatform = (income) => {
+    if (income?.displayPlatform) return income.displayPlatform;
+    if (!income?.platform) return '';
+    return formatPlatformName(income.platform);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -98,7 +111,7 @@ function IncomeList() {
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-xl font-bold text-gray-800 flex items-center">
           <FiDollarSign className="mr-2 text-blue-500" />
-          Income Records
+          Income History
         </h3>
         <div className="text-sm text-gray-500">
           {incomes.length} {incomes.length === 1 ? 'record' : 'records'} found
@@ -152,10 +165,16 @@ function IncomeList() {
                 {incomes.map((income) => (
                   <IncomeRow
                     key={income.id}
-                    income={income}
+                    income={{
+                      ...income,
+                      platform: getDisplayPlatform(income)
+                    }}
                     editingId={editingId}
                     setEditingId={setEditingId}
-                    editForm={editForm}
+                    editForm={{
+                      ...editForm,
+                      platform: editForm.platform ? formatPlatformName(editForm.platform) : ''
+                    }}
                     setEditForm={setEditForm}
                     handleUpdate={handleUpdate}
                     handleDelete={handleDelete}

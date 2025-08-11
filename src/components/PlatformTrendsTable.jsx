@@ -27,7 +27,7 @@ const MONTHS_TO_SHOW = 4; // For compact view - shows last 4 months
 function PlatformTrendsTable({ compact = true }) {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-  const [data, setData] = useState({ platforms: [], rows: [] });
+  const [incomes, setIncomes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -36,31 +36,48 @@ function PlatformTrendsTable({ compact = true }) {
     const platformColors = {};
     const platformSet = new Set();
 
+    // Track original platform casing for display
+    const platformDisplayNames = {};
+    
     // Process each income record
     incomes.forEach((income) => {
       try {
         const date = income?.date ? parseISO(income.date) : new Date();
         const month = format(date, 'MMM yyyy');
-        const platform = income?.platform?.trim() || DEFAULT_PLATFORM;
+        
+        // Get the display name from displayPlatform or platform field
+        const platformDisplay = income?.displayPlatform || 
+                              (income?.platform ? 
+                                (income.platform.charAt(0).toUpperCase() + income.platform.slice(1).toLowerCase()) : 
+                                DEFAULT_PLATFORM);
+        
+        // Use lowercase for grouping to ensure case-insensitive matching
+        const platformKey = platformDisplay.toLowerCase();
 
         if (!monthPlatformTotals[month]) {
           monthPlatformTotals[month] = {};
         }
 
-        monthPlatformTotals[month][platform] = 
-          (monthPlatformTotals[month][platform] || 0) + (income.amount || 0);
+        monthPlatformTotals[month][platformKey] = 
+          (monthPlatformTotals[month][platformKey] || 0) + (income.amount || 0);
         
-        platformSet.add(platform);
+        // Store the display name with original casing
+        platformDisplayNames[platformKey] = platformDisplay;
+        platformSet.add(platformKey);
         
-        if (!platformColors[platform]) {
-          platformColors[platform] = generatePlatformColor(platform);
+        if (!platformColors[platformKey]) {
+          platformColors[platformKey] = generatePlatformColor(platformKey);
         }
       } catch (err) {
         console.error('Error processing income:', err);
       }
     });
 
-    const platforms = Array.from(platformSet).sort();
+    // Sort platforms alphabetically by display name
+    const platforms = Array.from(platformSet).sort((a, b) => 
+      (platformDisplayNames[a] || a).localeCompare(platformDisplayNames[b] || b)
+    );
+    
     const months = Object.keys(monthPlatformTotals)
       .sort((a, b) => new Date(a) - new Date(b));
 
@@ -74,9 +91,9 @@ function PlatformTrendsTable({ compact = true }) {
       const row = { month, total: 0, platforms: {} };
       let monthTotal = 0;
 
-      platforms.forEach(platform => {
-        const amount = monthPlatformTotals[month]?.[platform] || 0;
-        row.platforms[platform] = amount;
+      platforms.forEach(platformKey => {
+        const amount = monthPlatformTotals[month]?.[platformKey] || 0;
+        row.platforms[platformKey] = amount;
         monthTotal += amount;
       });
 
@@ -84,7 +101,7 @@ function PlatformTrendsTable({ compact = true }) {
       return row;
     });
 
-    return { platforms, rows, platformColors };
+    return { platforms, rows, platformColors, platformDisplayNames };
   }, [compact]);
 
   useEffect(() => {
@@ -106,9 +123,8 @@ function PlatformTrendsTable({ compact = true }) {
         q,
         (snapshot) => {
           try {
-            const incomes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            const processedData = processIncomes(incomes);
-            setData(processedData);
+            const incomeData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setIncomes(incomeData);
           } catch (err) {
             console.error('Error processing snapshot:', err);
             setError('Failed to process income data');
@@ -135,14 +151,24 @@ function PlatformTrendsTable({ compact = true }) {
     navigate('/platform-trends');
   };
 
-  if (error) {
-    return (
-      <Box p={3} textAlign="center">
-        <Typography color="error">{error}</Typography>
-      </Box>
-    );
-  }
+  // Process the incomes data
+  const { platforms, rows, platformColors, platformDisplayNames } = useMemo(() => {
+    const processed = processIncomes(incomes);
+    // Ensure all display names have proper capitalization
+    Object.keys(processed.platformDisplayNames).forEach(key => {
+      const name = processed.platformDisplayNames[key];
+      if (name && name.length > 0) {
+        processed.platformDisplayNames[key] = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+      }
+    });
+    return processed;
+  }, [incomes, processIncomes]);
 
+  const formatCurrency = (amount) => {
+    return amount ? `$${amount.toLocaleString()}` : '-';
+  };
+
+  // Show loading state
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" p={3}>
@@ -151,8 +177,24 @@ function PlatformTrendsTable({ compact = true }) {
     );
   }
 
-  const { platforms, rows, platformColors } = data;
+  // Show error state
+  if (error) {
+    return (
+      <Box p={3} textAlign="center">
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
+  }
 
+  // Show empty state
+  if (incomes.length === 0) {
+    return (
+      <Box p={3} textAlign="center">
+        <Typography>No income data available. Add some income records to see trends.</Typography>
+      </Box>
+    );
+  }
+  
   return (
     <Paper elevation={2} sx={{ p: 2, mb: 4 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -177,21 +219,25 @@ function PlatformTrendsTable({ compact = true }) {
           <TableHead>
             <TableRow>
               <TableCell>Month</TableCell>
-              {platforms.map(platform => (
-                <TableCell key={platform} align="right">
-                  <Tooltip title={platform}>
-                    <Chip 
-                      label={platform.length > 10 ? `${platform.substring(0, 8)}...` : platform}
-                      size="small"
-                      sx={{ 
-                        bgcolor: `${platformColors[platform]}22`, 
-                        border: `1px solid ${platformColors[platform]}`,
-                        maxWidth: 100
-                      }}
-                    />
-                  </Tooltip>
-                </TableCell>
-              ))}
+              {platforms.map((platformKey) => {
+                const displayName = platformDisplayNames[platformKey] || platformKey;
+                return (
+                  <TableCell key={platformKey} align="center">
+                    <Tooltip title={displayName}>
+                      <Chip 
+                        label={displayName.length > 10 ? `${displayName.substring(0, 8)}...` : displayName}
+                        size="small"
+                        sx={{ 
+                          bgcolor: `${platformColors[platformKey]}22`, 
+                          border: `1px solid ${platformColors[platformKey]}`,
+                          maxWidth: 100,
+                          textTransform: 'capitalize'
+                        }}
+                      />
+                    </Tooltip>
+                  </TableCell>
+                );
+              })}
               <TableCell align="right">Total</TableCell>
             </TableRow>
           </TableHead>
@@ -203,7 +249,7 @@ function PlatformTrendsTable({ compact = true }) {
                 </TableCell>
                 {platforms.map(platform => (
                   <TableCell key={platform} align="right">
-                    {row.platforms[platform] ? `$${row.platforms[platform].toLocaleString()}` : '-'}
+                    {formatCurrency(row.platforms[platform] || 0)}
                   </TableCell>
                 ))}
                 <TableCell align="right" sx={{ fontWeight: 'bold' }}>

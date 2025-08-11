@@ -41,24 +41,45 @@ function IncomeForm() {
   });
 
   const onSubmit = async (data) => {
-
     try {
-
       const q = query(
-      collection(db, "incomes"),
-      where("userId", "==", currentUser.uid)
-     );
+        collection(db, "incomes"),
+        where("userId", "==", currentUser.uid)
+      );
 
-     const snapshot = await getDocs(q);
+      const snapshot = await getDocs(q);
 
       if (!isPro && snapshot.docs.length >= 50) {
-      return toast.error("Free plan limit reached. Upgrade to add more.");
-     }
+        return toast.error("Free plan limit reached. Upgrade to add more.");
+      }
+
+      // Normalize platform name: trim and capitalize first letter
+      const platformName = data.platform.trim();
+      const displayName = platformName.charAt(0).toUpperCase() + platformName.slice(1).toLowerCase();
+
+      // Check if this platform exists (case-insensitive)
+      const existingPlatforms = new Set();
+      snapshot.docs.forEach(doc => {
+        const platform = doc.data().displayPlatform || doc.data().platform;
+        if (platform) {
+          existingPlatforms.add(platform.toLowerCase());
+        }
+      });
+
+      // If platform exists with different case, use the existing version
+      let finalDisplayName = displayName;
+      for (const platform of existingPlatforms) {
+        if (platform.toLowerCase() === displayName.toLowerCase()) {
+          finalDisplayName = platform.charAt(0).toUpperCase() + platform.slice(1);
+          break;
+        }
+      }
 
       await addDoc(collection(db, "incomes"), {
         userId: currentUser.uid,
         amount: data.amount,
-        platform: data.platform,
+        platform: finalDisplayName.toLowerCase(),  // Store lowercase for case-insensitive matching
+        displayPlatform: finalDisplayName,        // Store properly formatted display name
         date: data.date,
         description: data.description,
         client: data.client || "",

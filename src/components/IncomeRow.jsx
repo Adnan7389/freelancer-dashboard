@@ -44,14 +44,16 @@ function IncomeRow({
                 <FiLayers className="text-gray-400" />
               </div>
               <select
-                value={editForm.platform}
-                onChange={(e) => handleInputChange("platform", e.target.value)}
+                value={editForm.platform.toLowerCase()}
+                onChange={(e) => handleInputChange("platform", e.target.value.toLowerCase())}
                 className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
                 aria-label="Platform"
               >
-                <option value="Fiverr">Fiverr</option>
-                <option value="Upwork">Upwork</option>
-                <option value="Other">Other</option>
+                {['Fiverr', 'Upwork', 'Other', 'Freelancer', 'Toptal', 'PeoplePerHour', 'Direct Client'].map(platform => (
+                <option key={platform} value={platform.toLowerCase()}>
+                  {platform}
+                </option>
+              ))}
               </select>
             </div>
           </td>

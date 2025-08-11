@@ -42,11 +42,33 @@ function AnalyticsSummary() {
       const totalIncome = incomes.reduce((sum, income) => sum + income.amount, 0);
       const averageIncome = incomes.length ? totalIncome / incomes.length : 0;
       
-      const byPlatform = incomes.reduce((acc, income) => {
-        const platform = income.platform || "Other";
-        acc[platform] = (acc[platform] || 0) + income.amount;
-        return acc;
-      }, {});
+      // Group by platform (case-insensitive) and use displayPlatform when available
+      const platformMap = new Map();
+      
+      incomes.forEach(income => {
+        const platformName = income.displayPlatform || income.platform || "Other";
+        const platformKey = platformName.toLowerCase();
+        
+        // If we already have this platform (case-insensitive), use the existing display name
+        if (platformMap.has(platformKey)) {
+          const existing = platformMap.get(platformKey);
+          platformMap.set(platformKey, {
+            displayName: existing.displayName, // Keep the first display name we saw
+            amount: existing.amount + income.amount
+          });
+        } else {
+          platformMap.set(platformKey, {
+            displayName: platformName, // Store the display name with original case
+            amount: income.amount
+          });
+        }
+      });
+
+      // Convert to object with display names as keys
+      const byPlatform = {};
+      platformMap.forEach((value, key) => {
+        byPlatform[value.displayName] = value.amount;
+      });
 
       // Sort platforms by amount (descending)
       const sortedPlatforms = Object.entries(byPlatform)

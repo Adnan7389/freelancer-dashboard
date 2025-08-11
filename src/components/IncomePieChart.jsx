@@ -33,18 +33,38 @@ function IncomePieChart() {
         return;
       }
 
-      const platformTotals = incomes.reduce((acc, income) => {
-        const platform = income.platform || "Other";
-        acc[platform] = (acc[platform] || 0) + income.amount;
-        return acc;
-      }, {});
+      // Group by platform (case-insensitive) and use displayPlatform when available
+      const platformMap = new Map();
+      
+      incomes.forEach(income => {
+        const platformName = income.displayPlatform || income.platform || "Other";
+        const platformKey = platformName.toLowerCase();
+        
+        // If we already have this platform (case-insensitive), use the existing display name
+        if (platformMap.has(platformKey)) {
+          const existing = platformMap.get(platformKey);
+          platformMap.set(platformKey, {
+            displayName: existing.displayName, // Keep the first display name we saw
+            amount: existing.amount + income.amount
+          });
+        } else {
+          platformMap.set(platformKey, {
+            displayName: platformName, // Store the display name with original case
+            amount: income.amount
+          });
+        }
+      });
 
       // Sort platforms by amount (descending)
-      const sortedEntries = Object.entries(platformTotals)
-        .sort((a, b) => b[1] - a[1]);
+      const sortedEntries = Array.from(platformMap.entries())
+        .map(([_, value]) => ({
+          displayName: value.displayName,
+          amount: value.amount
+        }))
+        .sort((a, b) => b.amount - a.amount);
 
-      const labels = sortedEntries.map(([platform]) => platform);
-      const data = sortedEntries.map(([_, amount]) => amount);
+      const labels = sortedEntries.map(entry => entry.displayName);
+      const data = sortedEntries.map(entry => entry.amount);
 
       // Generate consistent colors based on platform names
       const platformColors = labels.map(platform => {
