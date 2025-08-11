@@ -103,8 +103,10 @@ function Dashboard() {
             <IncomePieChart />
           </div>
 
-          <PlatformTrendsTable />
-          <IncomeDataTools />
+          <div className="grid grid-cols-1 gap-6">
+            <PlatformTrendsTable compact={true} />
+            <IncomeDataTools />
+          </div>
         </div>
       </div>
 

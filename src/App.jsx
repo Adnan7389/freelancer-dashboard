@@ -10,6 +10,7 @@ import Signup from "./pages/SignupPage";
 import Dashboard from "./pages/Dashboard";
 import SettingsPage from "./pages/SettingsPage";
 import IncomeRecords from "./pages/IncomeRecords";
+import PlatformTrendsPage from "./pages/PlatformTrendsPage";
 import AboutPage from "./pages/AboutPage";
 import { Toaster } from "react-hot-toast";
 import { useAuth } from "./hooks/useAuth";
@@ -29,7 +30,8 @@ function FooterWrapper() {
   const isAuthenticatedPage = [
     '/dashboard',
     '/dashboard/settings',
-    '/income-records'
+    '/income-records',
+    '/platform-trends'
   ].some(path => location.pathname.startsWith(path));
   
   // Don't show footer on login/signup pages
@@ -70,6 +72,14 @@ function App() {
                 }
               />
               <Route path="/income-records" element={<ProtectedRoute><IncomeRecords /></ProtectedRoute>} />
+              <Route 
+                path="/platform-trends" 
+                element={
+                  <ProtectedRoute>
+                    <PlatformTrendsPage />
+                  </ProtectedRoute>
+                } 
+              />
             </Routes>
           </main>
           <FooterWrapper />
