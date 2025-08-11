@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { FiUpload, FiDownload, FiFilter, FiFileText } from "react-icons/fi";
+import { FiUpload, FiDownload, FiFilter, FiFileText, FiCalendar } from "react-icons/fi";
 import { useProStatus } from "../hooks/useProStatus";
 import { exportIncomesToCSV, importCSVToIncomes } from "../utils/csvUtils";
 import toast from "react-hot-toast";
 import { useAuth } from "../hooks/useAuth";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, limit } from "firebase/firestore";
 import { db } from "../firebase";
 import dayjs from "dayjs";
 
@@ -12,27 +12,46 @@ function IncomeDataTools() {
   const { currentUser } = useAuth();
   const isPro = useProStatus();
   const [loading, setLoading] = useState(false);
+  const currentYear = dayjs().year();
+  const years = [currentYear - 2, currentYear - 1, currentYear];
+  const [selectedYear, setSelectedYear] = useState(currentYear);
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [recordCount, setRecordCount] = useState(null);
   const [isSelectAll, setIsSelectAll] = useState(false);
+  const [isLoadingCount, setIsLoadingCount] = useState(false);
 
-  const allMonths = Array.from({ length: 12 }, (_, i) =>
-    dayjs().month(i).format("MMMM")
-  );
+  const allMonths = Array.from({ length: 12 }, (_, i) => ({
+    name: dayjs().month(i).format("MMMM"),
+    value: i + 1
+  }));
 
-  const handleMonthToggle = (month) => {
-    setSelectedMonths((prev) =>
-      prev.includes(month)
-        ? prev.filter((m) => m !== month)
-        : [...prev, month]
-    );
+  const toggleMonth = (month) => {
+    // If 'Select All' is clicked
+    if (month === 'all') {
+      const allMonthValues = allMonths.map(m => m.value);
+      const newSelection = selectedMonths.length === allMonthValues.length ? [] : allMonthValues;
+      setSelectedMonths(newSelection);
+      setIsSelectAll(!isSelectAll);
+    } else {
+      // Toggle individual month
+      setSelectedMonths(prev => {
+        const newSelection = prev.includes(month)
+          ? prev.filter(m => m !== month)
+          : [...prev, month];
+        
+        // Update 'Select All' checkbox state
+        setIsSelectAll(newSelection.length === allMonths.length);
+        
+        return newSelection;
+      });
+    }
   };
 
   const handleSelectAll = () => {
     if (isSelectAll) {
       setSelectedMonths([]);
     } else {
-      setSelectedMonths([...allMonths]);
+      setSelectedMonths(allMonths.map(m => m.value));
     }
     setIsSelectAll(!isSelectAll);
   };
@@ -42,12 +61,22 @@ function IncomeDataTools() {
       return toast.error("Please select at least one month to export");
     }
 
+    if (recordCount === 0) {
+      return toast.error("No records found for the selected period");
+    }
+
     try {
       setLoading(true);
-      await exportIncomesToCSV(currentUser.uid, selectedMonths);
+      // Convert month names to numbers (e.g., 'July' -> 7, 'August' -> 8)
+      const monthNumbers = selectedMonths.map(month => 
+        typeof month === 'string' ? new Date(`${month} 1, 2000`).getMonth() + 1 : month
+      );
+      
+      await exportIncomesToCSV(currentUser.uid, monthNumbers, selectedYear);
       toast.success("Export completed successfully!");
-    } catch (err) {
-      toast.error("Export failed: " + err.message);
+    } catch (error) {
+      console.error("Export failed:", error);
+      toast.error(error.message || "Export failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -79,28 +108,76 @@ function IncomeDataTools() {
         setRecordCount(null);
         return;
       }
-
+      
       try {
+        setIsLoadingCount(true);
         const incomeRef = collection(db, "incomes");
-        const snapshot = await getDocs(
-          query(incomeRef, where("userId", "==", currentUser.uid))
+        
+        // First, check if we can find any records without date filtering
+        const allRecordsQuery = query(
+          incomeRef,
+          where("userId", "==", currentUser.uid),
+          limit(5) // Just get a few records to check
         );
-
-        const filtered = snapshot.docs.filter((doc) => {
-          const date = doc.data().date;
-          const monthName = dayjs(date).format("MMMM");
-          return selectedMonths.includes(monthName);
+        
+        const allRecords = await getDocs(allRecordsQuery);
+        
+        if (allRecords.empty) {
+          console.warn('No income records found for user');
+          setRecordCount(0);
+          return;
+        }
+        
+        // Query all records for the user, we'll filter by date in memory
+        const q = query(
+          incomeRef,
+          where("userId", "==", currentUser.uid)
+        );
+        
+        const snapshot = await getDocs(q);
+        
+        // Filter client-side by selected months and year
+        const filtered = snapshot.docs.filter(doc => {
+          const data = doc.data();
+          if (!data.date) {
+            console.warn('Document missing date field:', doc.id);
+            return false;
+          }
+          
+          // Parse the date string (format: 'YYYY-MM-DD')
+          const dateStr = data.date;
+          const [year, month, day] = dateStr.split('-').map(Number);
+          
+          // Validate the date
+          const date = new Date(year, month - 1, day);
+          if (isNaN(date.getTime())) {
+            console.warn('Invalid date format:', data.date, 'in document:', doc.id);
+            return false;
+          }
+          
+          // Get the month and year from the date
+          const monthNum = date.getMonth() + 1; // Convert to 1-12
+          const yearNum = date.getFullYear();
+          
+          // Check if the record's year matches the selected year
+          // and if the record's month is in the selected months
+          const isInSelectedYear = yearNum === selectedYear;
+          const isInSelectedMonths = selectedMonths.includes(monthNum);
+          
+          return isInSelectedYear && isInSelectedMonths;
         });
-
+        
         setRecordCount(filtered.length);
       } catch (err) {
         console.error("Failed to fetch record count:", err);
         setRecordCount(null);
+      } finally {
+        setIsLoadingCount(false);
       }
     };
 
     fetchRecordCount();
-  }, [selectedMonths, currentUser]);
+  }, [selectedMonths, selectedYear, currentUser]);
 
   if (!isPro) return null;
 
@@ -116,12 +193,35 @@ function IncomeDataTools() {
         </p>
       </div>
 
+      {/* Year Selector */}
+      <div className="space-y-3">
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <FiCalendar className="text-gray-500" />
+          Select Year
+        </label>
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {years.map((year) => (
+            <button
+              key={year}
+              onClick={() => setSelectedYear(year)}
+              className={`px-4 py-2 rounded-lg border transition-colors whitespace-nowrap ${
+                selectedYear === year
+                  ? 'bg-blue-50 border-blue-200 text-blue-700 font-medium'
+                  : 'bg-white border-gray-200 hover:bg-gray-50'
+              }`}
+            >
+              {year}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Month Selector */}
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
             <FiFilter className="text-gray-500" />
-            Filter by Month
+            Select Months ({selectedYear})
           </label>
           <button
             onClick={handleSelectAll}
@@ -134,25 +234,44 @@ function IncomeDataTools() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {allMonths.map((month) => (
             <button
-              key={month}
-              onClick={() => handleMonthToggle(month)}
+              key={month.value}
+              onClick={() => toggleMonth(month.value)}
+              disabled={loading}
               className={`flex items-center justify-center py-2 px-3 rounded-lg border transition-colors ${
-                selectedMonths.includes(month)
+                selectedMonths.includes(month.value)
                   ? 'bg-blue-50 border-blue-200 text-blue-700'
                   : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-              }`}
+              } ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              <span className="text-sm font-medium">{month}</span>
+              <span className="text-sm font-medium">{month.name}</span>
             </button>
           ))}
         </div>
       </div>
 
       {/* Preview Info */}
-      {recordCount !== null && (
+      {isLoadingCount ? (
         <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
           <p className="text-sm text-blue-700">
-            <span className="font-medium">{recordCount}</span> record{recordCount !== 1 ? 's' : ''} match your selection
+            Loading record count...
+          </p>
+        </div>
+      ) : recordCount !== null && (
+        <div className={`p-3 rounded-lg border ${
+          recordCount > 0 
+            ? 'bg-blue-50 border-blue-100' 
+            : 'bg-amber-50 border-amber-100'
+        }`}>
+          <p className={`text-sm ${
+            recordCount > 0 ? 'text-blue-700' : 'text-amber-700'
+          }`}>
+            {recordCount > 0 ? (
+              <span>
+                Found <span className="font-medium">{recordCount}</span> record{recordCount !== 1 ? 's' : ''} for {selectedMonths.length} selected month{selectedMonths.length !== 1 ? 's' : ''} in {selectedYear}
+              </span>
+            ) : (
+              <span>No records found for the selected period</span>
+            )}
           </p>
         </div>
       )}
@@ -161,7 +280,7 @@ function IncomeDataTools() {
       <div className="flex flex-col sm:flex-row gap-3">
         <button
           onClick={handleExport}
-          disabled={loading || selectedMonths.length === 0}
+          disabled={loading || selectedMonths.length === 0 || recordCount === 0}
           className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors ${
             loading || selectedMonths.length === 0
               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
