@@ -1,4 +1,4 @@
-import { FiPlus, FiSettings, FiLogOut, FiUser, FiHome, FiTrendingUp, FiPieChart } from "react-icons/fi";
+import { FiPlus, FiSettings, FiLogOut, FiUser, FiHome, FiTrendingUp, FiPieChart, FiDownload } from "react-icons/fi";
 import { FaMoneyBillWave } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
@@ -49,6 +49,14 @@ function Sidebar({ currentUser, sidebarOpen, onLogout }) {
           >
             <FiTrendingUp className="text-gray-500 group-hover:text-blue-600" />
             <span>Analytics</span>
+          </Link>
+
+          <Link
+            to="/income-tools"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors group"
+          >
+            <FiDownload className="text-gray-500 group-hover:text-blue-600" />
+            <span>Data Tools</span>
           </Link>
 
           <div className="text-xs font-medium text-gray-400 uppercase tracking-wider mt-6 mb-2 px-3">

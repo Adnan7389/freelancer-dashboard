@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import IncomeForm from "../components/IncomeForm";
 import AnalyticsSummary from "../components/AnalyticsSummary";
 import IncomeChart from "../components/IncomeChart";
@@ -12,16 +12,19 @@ import {
   FiMenu,
   FiX,
   FiPlus,
+  FiChevronLeft,
 } from "react-icons/fi";
 import Sidebar from "../components/Sidebar";
-import IncomeDataTools from "../components/IncomeDataTools";
-
 
 function Dashboard() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showForm, setShowForm] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  // Check if we're on a subpage that should show the back button
+  const showBackButton = location.pathname !== '/dashboard';
 
   const handleLogout = async () => {
     try {
@@ -77,9 +80,19 @@ function Dashboard() {
       {/* Main content */}
       <div className="flex-1 p-4 lg:p-6">
         <div className="flex items-center justify-between mb-6 lg:hidden">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Welcome, {currentUser?.name}
-          </h2>
+          {showBackButton ? (
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center text-gray-600 hover:text-gray-900"
+            >
+              <FiChevronLeft className="mr-1" size={20} />
+              <span>Back</span>
+            </button>
+          ) : (
+            <h2 className="text-2xl font-bold text-gray-800">
+              Welcome, {currentUser?.name}
+            </h2>
+          )}
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-2 text-gray-500 hover:text-gray-700"
@@ -105,7 +118,6 @@ function Dashboard() {
 
           <div className="grid grid-cols-1 gap-6">
             <PlatformTrendsTable compact={true} />
-            <IncomeDataTools />
           </div>
         </div>
       </div>

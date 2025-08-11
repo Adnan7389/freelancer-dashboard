@@ -12,6 +12,7 @@ import SettingsPage from "./pages/SettingsPage";
 import IncomeRecords from "./pages/IncomeRecords";
 import PlatformTrendsPage from "./pages/PlatformTrendsPage";
 import AboutPage from "./pages/AboutPage";
+import IncomeToolsPage from "./pages/IncomeToolsPage";
 import { Toaster } from "react-hot-toast";
 import { useAuth } from "./hooks/useAuth";
 
@@ -31,7 +32,8 @@ function FooterWrapper() {
     '/dashboard',
     '/dashboard/settings',
     '/income-records',
-    '/platform-trends'
+    '/platform-trends',
+    '/income-tools'
   ].some(path => location.pathname.startsWith(path));
   
   // Don't show footer on login/signup pages
@@ -77,6 +79,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <PlatformTrendsPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/income-tools" 
+                element={
+                  <ProtectedRoute>
+                    <IncomeToolsPage />
                   </ProtectedRoute>
                 } 
               />
