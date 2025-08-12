@@ -85,6 +85,13 @@ function Sidebar({ currentUser, sidebarOpen, onLogout }) {
             <span>Settings</span>
           </Link>
 
+          <Link
+            to="/legal"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors group text-sm"
+          >
+            <span className="ml-1">Legal</span>
+          </Link>
+
           <a
             href="https://trackmyincome.lemonsqueezy.com/buy/fc8795bb-8bc2-483e-badf-a2b2afcfdd30"
             target="_blank"
