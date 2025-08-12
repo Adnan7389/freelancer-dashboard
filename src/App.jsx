@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
 import Navbar from "./components/Navbar";
 import LandingNavbar from "./components/LandingNavbar";
 import Footer from "./components/Footer";
@@ -13,6 +14,7 @@ import IncomeRecords from "./pages/IncomeRecords";
 import PlatformTrendsPage from "./pages/PlatformTrendsPage";
 import AboutPage from "./pages/AboutPage";
 import IncomeToolsPage from "./pages/IncomeToolsPage";
+import Legal from "./pages/Legal";
 import { Toaster } from "react-hot-toast";
 import { useAuth } from "./hooks/useAuth";
 
@@ -33,7 +35,8 @@ function FooterWrapper() {
     '/dashboard/settings',
     '/income-records',
     '/platform-trends',
-    '/income-tools'
+    '/income-tools',
+    `/legal`
   ].some(path => location.pathname.startsWith(path));
   
   // Don't show footer on login/signup pages
@@ -55,6 +58,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<AboutPage />} />
+              <Route path="/legal" element={<Legal />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route
@@ -95,6 +99,7 @@ function App() {
           <FooterWrapper />
         </div>
       </div>
+      <Analytics />
     </Router>
   );
 }
