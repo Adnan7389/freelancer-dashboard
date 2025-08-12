@@ -1,13 +1,11 @@
-// api/lemonsqueezy-webhook.js
 import crypto from "crypto";
 import admin from "firebase-admin";
 
-// Initialize Firebase Admin with Service Account from env
+// Initialize Firebase Admin using Service Account from env
 if (!admin.apps.length) {
   const serviceAccount = JSON.parse(
     Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT, "base64").toString()
   );
-
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
   });
@@ -35,11 +33,15 @@ export default async function handler(req, res) {
   }
 
   const event = req.body;
-  try {
-    const userEmail = event.data.attributes.user_email;
-    const type = event.meta.event_name;
+  const type = event.meta?.event_name;
+  const userEmail = event.data?.attributes?.user_email;
 
-    // Find user by email
+  if (!userEmail) {
+    console.error("No email found in event payload");
+    return res.status(400).send("No user email in event");
+  }
+
+  try {
     const usersRef = db.collection("users");
     const snapshot = await usersRef.where("email", "==", userEmail).get();
 
@@ -51,15 +53,26 @@ export default async function handler(req, res) {
     const userDoc = snapshot.docs[0];
     const userRef = userDoc.ref;
 
-    // Upgrade/Downgrade plan
-    if (["order_created", "subscription_created", "subscription_payment_success"].includes(type)) {
+    // Events that upgrade to Pro
+    if (
+      [
+        "order_created",
+        "subscription_created",
+        "subscription_updated",
+        "subscription_payment_success",
+        "subscription_plan_changed",
+      ].includes(type)
+    ) {
       await userRef.update({ plan: "pro" });
-      console.log("User upgraded to Pro:", userEmail);
+      console.log(`User upgraded to Pro due to ${type}:`, userEmail);
     }
 
-    if (["subscription_cancelled", "subscription_expired"].includes(type)) {
+    // Events that downgrade to Free
+    if (
+      ["subscription_cancelled", "subscription_expired", "subscription_payment_failed"].includes(type)
+    ) {
       await userRef.update({ plan: "free" });
-      console.log("User downgraded to Free:", userEmail);
+      console.log(`User downgraded to Free due to ${type}:`, userEmail);
     }
 
     res.status(200).send("Webhook handled");
