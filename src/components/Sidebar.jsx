@@ -1,8 +1,10 @@
 import { FiPlus, FiSettings, FiLogOut, FiUser, FiHome, FiTrendingUp, FiPieChart, FiDownload } from "react-icons/fi";
 import { FaMoneyBillWave } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { useProStatus } from "../hooks/useProStatus";
 
 function Sidebar({ currentUser, sidebarOpen, onLogout }) {
+  const isPro = useProStatus();
   return (
     <div className={`
       fixed lg:static inset-y-0 left-0 w-72 bg-white border-r border-gray-100
@@ -92,20 +94,22 @@ function Sidebar({ currentUser, sidebarOpen, onLogout }) {
             <span className="ml-1">Legal</span>
           </Link>
 
-          <a
-            href="https://trackmyincome.lemonsqueezy.com/buy/fc8795bb-8bc2-483e-badf-a2b2afcfdd30"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between gap-2 mt-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-medium py-2.5 px-4 rounded-lg hover:opacity-90 transition-opacity"
-          >
-            <span className="flex items-center gap-2">
-              <FiPlus />
-              Upgrade to Pro
-            </span>
-            <span className="text-xs bg-yellow-700 text-yellow-100 px-2 py-0.5 rounded-full">
-              $9/month
-            </span>
-          </a>
+          {!isPro && (
+            <a
+              href="https://trackmyincome.lemonsqueezy.com/buy/fc8795bb-8bc2-483e-badf-a2b2afcfdd30"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between gap-2 mt-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-medium py-2.5 px-4 rounded-lg hover:opacity-90 transition-opacity"
+            >
+              <span className="flex items-center gap-2">
+                <FiPlus />
+                Upgrade to Pro
+              </span>
+              <span className="text-xs bg-yellow-700 text-yellow-100 px-2 py-0.5 rounded-full">
+                $9/month
+              </span>
+            </a>
+          )}
 
           <button
             onClick={onLogout}
