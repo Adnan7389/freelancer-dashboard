@@ -112,7 +112,6 @@ function AnalyticsPage() {
 
       setIsLoading(true);
       try {
-        console.log('Fetching analytics data...');
         const incomesRef = collection(db, 'incomes');
         const q = query(
           incomesRef,
@@ -129,14 +128,43 @@ function AnalyticsPage() {
         const currentMonth = currentDate.getMonth();
         const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
         
-        console.log(`Found ${querySnapshot.size} income records`); 
         querySnapshot.forEach((doc) => {
           try {
             const data = doc.data();
-            console.log('Processing income record:', doc.id, data);
             
-            // Convert Firestore Timestamp to Date if needed
-            const date = data.date?.toDate ? data.date.toDate() : new Date(data.date);
+            // Enhanced date validation and processing
+            let date;
+            try {
+              // Handle different date formats
+              if (data.date?.toDate) {
+                // Firestore Timestamp
+                date = data.date.toDate();
+              } else if (data.date) {
+                // Try parsing as Date or ISO string
+                date = new Date(data.date);
+                
+                // Validate the parsed date
+                if (isNaN(date.getTime())) {
+                  console.warn('Invalid date format, falling back to current date:', data.date);
+                  date = new Date(); // Fallback to current date if invalid
+                }
+              } else {
+                // No date provided, use current date as fallback
+                console.warn('Missing date, using current date');
+                date = new Date();
+              }
+              
+              // Ensure date is not in the future
+              const now = new Date();
+              if (date > now) {
+                console.warn('Future date detected, using current date instead');
+                date = now;
+              }
+            } catch (error) {
+              console.error('Error processing date, using current date as fallback:', error);
+              date = new Date();
+            }
+            
             const amount = parseFloat(data.amount) || 0;
             const clientName = data.client || 'Unknown';
             const platform = data.platform || 'Other';
@@ -186,8 +214,6 @@ function AnalyticsPage() {
           }))
           .sort((a, b) => b.totalEarnings - a.totalEarnings);
         
-        console.log('Client data processed. Top client:', sortedClients[0]?.name || 'None');
-        
         // Calculate growth rate
         const currentEarnings = monthlyEarnings[currentMonth] || 0;
         const previousEarnings = monthlyEarnings[prevMonth] || currentEarnings || 1; // Avoid division by zero
@@ -195,15 +221,11 @@ function AnalyticsPage() {
           ? ((currentEarnings - previousEarnings) / previousEarnings) * 100 
           : 0;
         
-        console.log('Monthly earnings:', { currentMonth, prevMonth, currentEarnings, previousEarnings, growthRate });
-        
         // Calculate platform comparison
         const platformComparison = calculatePlatformComparison(incomes);
-        console.log('Platform comparison:', platformComparison);
         
         // Calculate seasonal patterns
         const seasonalPatterns = calculateSeasonalPatterns(incomes);
-        console.log('Seasonal patterns:', seasonalPatterns);
         
         // Calculate predictions
         const last3Months = incomes.filter(income => {
@@ -215,8 +237,6 @@ function AnalyticsPage() {
         
         const last3MonthsTotal = last3Months.reduce((sum, income) => sum + (parseFloat(income.amount) || 0), 0);
         const last3MonthsAverage = last3Months.length > 0 ? last3MonthsTotal / last3Months.length : 0;
-        
-        console.log('Last 3 months data:', { count: last3Months.length, total: last3MonthsTotal, average: last3MonthsAverage });
         
         // Determine best time to work based on seasonal patterns
         let bestMonth = 'N/A';
