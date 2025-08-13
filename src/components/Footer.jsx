@@ -14,12 +14,12 @@ const Footer = () => {
               <li><Link to="/examples" className="text-gray-600 hover:text-blue-600">Examples</Link></li>
             </ul>
           </div>
-           {/* <div>
-             <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">Help</h3>
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">Help</h3>
             <ul className="mt-4 space-y-2">
               <li><Link to="/faq" className="text-gray-600 hover:text-blue-600">FAQ</Link></li>
-            </ul> 
-          </div>  */}
+            </ul>
+          </div>
           <div>
             <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">Connect</h3>
             <ul className="mt-4 space-y-2">
