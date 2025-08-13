@@ -104,6 +104,7 @@ function AnalyticsPage() {
   });
 
   useEffect(() => {
+    console.log('Timeframe changed to:', timeframe); // Debug log
     const fetchAnalytics = async () => {
       if (!currentUser || !isPro) {
         setIsLoading(false);
@@ -112,62 +113,104 @@ function AnalyticsPage() {
 
       setIsLoading(true);
       try {
-        const incomesRef = collection(db, 'incomes');
+        const now = new Date();
+        
+        // First, fetch all records
+        console.log('[DEBUG] Fetching all income records...');
         const q = query(
-          incomesRef,
+          collection(db, 'incomes'),
           where('userId', '==', currentUser.uid),
           orderBy('date', 'desc')
         );
         
         const querySnapshot = await getDocs(q);
-        const incomes = [];
-        let totalEarnings = 0;
-        const clients = new Map();
-        const monthlyEarnings = Array(12).fill(0);
-        const currentDate = new Date();
-        const currentMonth = currentDate.getMonth();
+        console.log(`[DEBUG] Found ${querySnapshot.size} total records`);
+        
+        // Process all records first
+        const allIncomes = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          let date = data.date?.toDate ? data.date.toDate() : new Date(data.date);
+          allIncomes.push({
+            ...data,
+            id: doc.id,
+            date: date
+          });
+          console.log(`[DEBUG] Record: ${doc.id} - ${date.toISOString()} - $${data.amount}`);
+        });
+        
+        // Process the filtered incomes
+        const currentMonth = now.getMonth();
         const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
         
-        querySnapshot.forEach((doc) => {
+        // Calculate filter date based on timeframe
+        let filterDate = null;
+        if (timeframe !== 'all') {
+          filterDate = new Date(now);
+          switch(timeframe) {
+            case 'week':
+              filterDate.setDate(now.getDate() - 7);
+              break;
+            case 'month':
+              filterDate.setMonth(now.getMonth() - 1);
+              break;
+            case 'year':
+              filterDate.setFullYear(now.getFullYear() - 1);
+              break;
+            default:
+              filterDate = null;
+          }
+        }
+        
+        console.log(`[DEBUG] Current date range: ${filterDate ? filterDate.toISOString() : 'No date filter'} to ${now.toISOString()}`);
+        
+        // Filter incomes by date if needed
+        const filteredIncomes = filterDate 
+          ? allIncomes.filter(income => {
+              const incomeDate = income.date?.toDate ? income.date.toDate() : new Date(income.date);
+              return incomeDate >= filterDate && incomeDate <= now;
+            })
+          : [...allIncomes];
+        
+        console.log(`[DEBUG] Found ${filteredIncomes.length} records after date filtering`);
+        
+        // Initialize variables for processing
+        const incomes = filteredIncomes;
+        let recordCount = 0;
+        const clients = new Map();
+        const monthlyEarnings = Array(12).fill(0);
+        let totalEarnings = 0;
+        const processedIncomes = [];
+        
+        for (const income of incomes) {
           try {
-            const data = doc.data();
+            recordCount++;
             
-            // Enhanced date validation and processing
-            let date;
-            try {
-              // Handle different date formats
-              if (data.date?.toDate) {
-                // Firestore Timestamp
-                date = data.date.toDate();
-              } else if (data.date) {
-                // Try parsing as Date or ISO string
-                date = new Date(data.date);
-                
-                // Validate the parsed date
-                if (isNaN(date.getTime())) {
-                  console.warn('Invalid date format, falling back to current date:', data.date);
-                  date = new Date(); // Fallback to current date if invalid
-                }
-              } else {
-                // No date provided, use current date as fallback
-                console.warn('Missing date, using current date');
-                date = new Date();
-              }
-              
-              // Ensure date is not in the future
-              const now = new Date();
-              if (date > now) {
-                console.warn('Future date detected, using current date instead');
-                date = now;
-              }
-            } catch (error) {
-              console.error('Error processing date, using current date as fallback:', error);
+            // Parse and validate date
+            let date = income.date;
+            if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+              console.warn('Invalid or missing date, using current date');
               date = new Date();
             }
             
-            const amount = parseFloat(data.amount) || 0;
-            const clientName = data.client || 'Unknown';
-            const platform = data.platform || 'Other';
+            // Ensure date is not in the future
+            const now = new Date();
+            if (date > now) {
+              console.warn('Future date detected, using current date instead');
+              date = new Date(now);
+            }
+            
+            const amount = parseFloat(income.amount) || 0;
+            const clientName = income.client || 'Unknown';
+            const platform = income.platform || 'Other';
+            
+            console.log(`[DEBUG] Processing record ${recordCount}:`, {
+              id: income.id,
+              amount: amount,
+              date: date.toISOString(),
+              client: clientName,
+              platform: platform
+            });
             
             // Track client data
             const clientData = clients.get(clientName) || { total: 0, count: 0 };
@@ -178,31 +221,29 @@ function AnalyticsPage() {
             // Track total earnings
             totalEarnings += amount;
             
-            // Track monthly earnings if date is valid
-            if (date && !isNaN(date.getTime())) {
-              const month = date.getMonth();
-              monthlyEarnings[month] = (monthlyEarnings[month] || 0) + amount;
-            }
+            // Track monthly earnings
+            const month = date.getMonth();
+            monthlyEarnings[month] = (monthlyEarnings[month] || 0) + amount;
             
             // Prepare income record
             const incomeRecord = {
-              id: doc.id,
+              id: income.id,
               amount: amount,
               platform: platform,
               date: date,
-              description: data.description || '',
+              description: income.description || '',
               client: clientName,
               status: 'completed',
-              project: data.description || 'No Project',
-              ...data
+              project: income.description || 'No Project',
+              ...income
             };
             
-            incomes.push(incomeRecord);
+            processedIncomes.push(incomeRecord);
             
           } catch (error) {
-            console.error('Error processing document:', doc.id, error);
+            console.error('Error processing income record:', error);
           }
-        });
+        }
 
         // Process client data
         const sortedClients = Array.from(clients.entries())
@@ -210,33 +251,34 @@ function AnalyticsPage() {
             name,
             totalEarnings: data.total,
             projectCount: data.count,
-            avgProjectValue: data.total / data.count
+            averageEarnings: data.total / Math.max(1, data.count)
           }))
           .sort((a, b) => b.totalEarnings - a.totalEarnings);
-        
-        // Calculate growth rate
-        const currentEarnings = monthlyEarnings[currentMonth] || 0;
-        const previousEarnings = monthlyEarnings[prevMonth] || currentEarnings || 1; // Avoid division by zero
-        const growthRate = previousEarnings > 0 
-          ? ((currentEarnings - previousEarnings) / previousEarnings) * 100 
-          : 0;
-        
+
+        // Calculate growth rate (month over month)
+        const currentMonthEarnings = monthlyEarnings[currentMonth] || 0;
+        const previousMonthEarnings = monthlyEarnings[prevMonth] || 0;
+        let growthRate = 0;
+        if (previousMonthEarnings > 0) {
+          growthRate = ((currentMonthEarnings - previousMonthEarnings) / previousMonthEarnings) * 100;
+        }
+
         // Calculate platform comparison
-        const platformComparison = calculatePlatformComparison(incomes);
+        const platformComparison = calculatePlatformComparison(processedIncomes);
+        
+        // Calculate monthly growth
+        const monthlyGrowth = calculateMonthlyGrowth(processedIncomes);
         
         // Calculate seasonal patterns
-        const seasonalPatterns = calculateSeasonalPatterns(incomes);
+        const seasonalPatterns = calculateSeasonalPatterns(processedIncomes);
         
-        // Calculate predictions
-        const last3Months = incomes.filter(income => {
-          if (!income.date) return false;
-          const threeMonthsAgo = new Date();
-          threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-          return income.date >= threeMonthsAgo;
-        });
-        
-        const last3MonthsTotal = last3Months.reduce((sum, income) => sum + (parseFloat(income.amount) || 0), 0);
-        const last3MonthsAverage = last3Months.length > 0 ? last3MonthsTotal / last3Months.length : 0;
+        // Calculate last 3 months average for projections
+        const last3MonthsEarnings = [
+          monthlyEarnings[(currentMonth - 2 + 12) % 12] || 0,
+          monthlyEarnings[(currentMonth - 1 + 12) % 12] || 0,
+          monthlyEarnings[currentMonth] || 0
+        ];
+        const last3MonthsAverage = last3MonthsEarnings.reduce((sum, val) => sum + val, 0) / 3;
         
         // Determine best time to work based on seasonal patterns
         let bestMonth = 'N/A';
@@ -249,10 +291,15 @@ function AnalyticsPage() {
           bestMonth = new Date(0, bestMonthIndex, 1).toLocaleString('default', { month: 'long' });
         }
         
-        // Update analytics state
-        const updatedAnalytics = {
+        // Update analytics state with the correct structure
+        setAnalytics({
           clientPerformance: {
-            topClients: sortedClients.slice(0, 5),
+            topClients: sortedClients.slice(0, 5).map(client => ({
+              name: client.name,
+              totalEarnings: client.totalEarnings,
+              projectCount: client.projectCount,
+              avgProjectValue: client.averageEarnings
+            })),
             newClients: sortedClients.filter(c => c.projectCount === 1).length,
             repeatClients: sortedClients.filter(c => c.projectCount > 1).length
           },
@@ -264,18 +311,24 @@ function AnalyticsPage() {
           predictions: {
             projectedEarnings: Math.round(last3MonthsAverage * 1.1), // 10% growth projection
             goalProgress: Math.min(100, Math.round((totalEarnings / 10000) * 100)), // Example $10k goal
-            confidence: Math.min(95, Math.max(70, Math.floor(last3Months.length / 3 * 100))), // Confidence based on data points
+            confidence: Math.min(95, Math.max(70, Math.floor(processedIncomes.length / 3 * 100))), // Confidence based on data points
             bestTimeToWork: bestMonth
           },
           _debug: {
             totalEarnings,
-            incomeCount: incomes.length,
+            incomeCount: processedIncomes.length,
             processedAt: new Date().toISOString()
           }
-        };
+        });
         
-        console.log('Updating analytics state:', updatedAnalytics);
-        setAnalytics(updatedAnalytics);
+        console.log('[DEBUG] Analytics data updated:', {
+          totalEarnings,
+          growthRate,
+          recordCount: processedIncomes.length,
+          timeFrame: timeframe
+        });
+        
+        setIsLoading(false);
       } catch (error) {
         console.error('Error loading analytics:', error);
       } finally {
