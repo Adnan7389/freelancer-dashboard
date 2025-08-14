@@ -358,47 +358,44 @@ function AnalyticsPage() {
           </div>
         ) : (
           <>
-            {/* Client Performance Section */}
+        {/* Client Performance Section */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-              {/* Top Clients Card */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                <h3 className="font-medium text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
-                  <FiAward className="w-5 h-5 text-yellow-500" />
-                  <span>Top Clients</span>
-                </h3>
-                <div className="space-y-2 sm:space-y-3 max-h-[300px] overflow-y-auto pr-2 -mr-2">
-                  {analytics.clientPerformance.topClients.length > 0 ? (
-                    analytics.clientPerformance.topClients.map((client, index) => (
-                      <div 
-                        key={index} 
-                        className="flex items-center justify-between gap-2 p-2 sm:p-3 hover:bg-gray-50 rounded-lg"
-                      >
-                        <div className="min-w-0 flex-1">
-                          <p 
-                            className="font-medium text-sm sm:text-base truncate" 
-                            title={client.name}
-                          >
-                            {client.name}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {client.projectCount} project{client.projectCount !== 1 ? 's' : ''}
-                          </p>
-                        </div>
-                        <div className="text-right min-w-[90px] sm:min-w-[110px]">
-                          <p className="font-bold text-sm sm:text-base text-gray-800">
-                            ${client.totalEarnings.toLocaleString()}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            ${Math.round(client.avgProjectValue).toLocaleString()}/project
-                          </p>
-                        </div>
+              {/* Top Clients Card - Mobile Optimized */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+             <h3 className="font-medium text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
+               <FiAward className="w-5 h-5 text-yellow-500" />
+               <span>Top Clients</span>
+              </h3>
+              <div className="space-y-2 sm:space-y-3 max-h-[300px] overflow-y-auto pr-2 -mr-2">
+                {analytics.clientPerformance.topClients.length > 0 ? (
+                  analytics.clientPerformance.topClients.map((client, index) => (
+                    <div 
+                      key={index} 
+                      className="flex items-start justify-between gap-2 p-2 sm:p-3 hover:bg-gray-50 rounded-lg"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm sm:text-base break-words line-clamp-2">
+                          {client.name}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {client.projectCount} project{client.projectCount !== 1 ? 's' : ''}
+                        </p>
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-400 text-sm p-2">No client data available</p>
-                  )}
-                </div>
+                      <div className="text-right min-w-[90px] sm:min-w-[110px] shrink-0">
+                        <p className="font-bold text-sm sm:text-base text-gray-800">
+                          ${client.totalEarnings.toLocaleString()}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          ${Math.round(client.avgProjectValue).toLocaleString()}/project
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-400 text-sm p-2">No client data available</p>
+                )}
               </div>
+            </div>
 
               {/* Client Base Card */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
