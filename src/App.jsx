@@ -19,6 +19,8 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 import Legal from "./pages/Legal";
 import FAQPage from "./pages/FAQPage";
 import PricingPage from "./pages/PricingPage";
+import FeedbackPage from "./pages/FeedbackPage";
+import AdminFeedbackPage from "./pages/AdminFeedbackPage";
 import { Toaster } from "react-hot-toast";
 import { useAuth } from "./hooks/useAuth";
 
@@ -41,7 +43,8 @@ function FooterWrapper() {
     '/platform-trends',
     '/income-tools',
     '/analytics',
-    '/legal'
+    '/legal',
+    '/feedback'
   ].some(path => location.pathname.startsWith(path));
   
   // Don't show footer on login/signup pages
@@ -66,8 +69,17 @@ function App() {
               <Route path="/legal" element={<Legal />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/faq" element={<FAQPage />} />
+              <Route path="/feedback" element={<FeedbackPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route 
+                path="/admin/feedback" 
+                element={
+                  <ProtectedRoute>
+                    <AdminFeedbackPage />
+                  </ProtectedRoute>
+                } 
+              />
               <Route 
                 path="/analytics" 
                 element={
