@@ -19,7 +19,12 @@ const calculatePlatformComparison = (incomes) => {
   const platforms = {};
   incomes.forEach(income => {
     if (income.platform) {
-      platforms[income.platform] = (platforms[income.platform] || 0) + (Number(income.amount) || 0);
+      // Convert platform name to title case for consistency
+      const platformName = income.platform.toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      platforms[platformName] = (platforms[platformName] || 0) + (Number(income.amount) || 0);
     }
   });
   return platforms;
@@ -68,7 +73,7 @@ const calculateSeasonalPatterns = (incomes) => {
           monthlyCounts[month]++;
         }
       } catch (e) {
-        console.error('Error processing date:', income.date, e);
+
       }
     }
   });
@@ -104,7 +109,7 @@ function AnalyticsPage() {
   });
 
   useEffect(() => {
-    console.log('Timeframe changed to:', timeframe); // Debug log
+
     const fetchAnalytics = async () => {
       if (!currentUser || !isPro) {
         setIsLoading(false);
@@ -116,7 +121,7 @@ function AnalyticsPage() {
         const now = new Date();
         
         // First, fetch all records
-        console.log('[DEBUG] Fetching all income records...');
+
         const q = query(
           collection(db, 'incomes'),
           where('userId', '==', currentUser.uid),
@@ -124,7 +129,6 @@ function AnalyticsPage() {
         );
         
         const querySnapshot = await getDocs(q);
-        console.log(`[DEBUG] Found ${querySnapshot.size} total records`);
         
         // Process all records first
         const allIncomes = [];
@@ -136,7 +140,6 @@ function AnalyticsPage() {
             id: doc.id,
             date: date
           });
-          console.log(`[DEBUG] Record: ${doc.id} - ${date.toISOString()} - $${data.amount}`);
         });
         
         // Process the filtered incomes
@@ -162,7 +165,7 @@ function AnalyticsPage() {
           }
         }
         
-        console.log(`[DEBUG] Current date range: ${filterDate ? filterDate.toISOString() : 'No date filter'} to ${now.toISOString()}`);
+
         
         // Filter incomes by date if needed
         const filteredIncomes = filterDate 
@@ -172,7 +175,7 @@ function AnalyticsPage() {
             })
           : [...allIncomes];
         
-        console.log(`[DEBUG] Found ${filteredIncomes.length} records after date filtering`);
+
         
         // Initialize variables for processing
         const incomes = filteredIncomes;
@@ -189,28 +192,20 @@ function AnalyticsPage() {
             // Parse and validate date
             let date = income.date;
             if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
-              console.warn('Invalid or missing date, using current date');
+
               date = new Date();
             }
             
             // Ensure date is not in the future
             const now = new Date();
             if (date > now) {
-              console.warn('Future date detected, using current date instead');
+
               date = new Date(now);
             }
             
             const amount = parseFloat(income.amount) || 0;
             const clientName = income.client || 'Unknown';
             const platform = income.platform || 'Other';
-            
-            console.log(`[DEBUG] Processing record ${recordCount}:`, {
-              id: income.id,
-              amount: amount,
-              date: date.toISOString(),
-              client: clientName,
-              platform: platform
-            });
             
             // Track client data
             const clientData = clients.get(clientName) || { total: 0, count: 0 };
@@ -241,7 +236,7 @@ function AnalyticsPage() {
             processedIncomes.push(incomeRecord);
             
           } catch (error) {
-            console.error('Error processing income record:', error);
+
           }
         }
 
@@ -313,25 +308,12 @@ function AnalyticsPage() {
             goalProgress: Math.min(100, Math.round((totalEarnings / 10000) * 100)), // Example $10k goal
             confidence: Math.min(95, Math.max(70, Math.floor(processedIncomes.length / 3 * 100))), // Confidence based on data points
             bestTimeToWork: bestMonth
-          },
-          _debug: {
-            totalEarnings,
-            incomeCount: processedIncomes.length,
-            processedAt: new Date().toISOString()
           }
-        });
-        
-        console.log('[DEBUG] Analytics data updated:', {
-          totalEarnings,
-          growthRate,
-          recordCount: processedIncomes.length,
-          timeFrame: timeframe
         });
         
         setIsLoading(false);
       } catch (error) {
-        console.error('Error loading analytics:', error);
-      } finally {
+        // Error handling is silent in production
         setIsLoading(false);
       }
     };
@@ -414,22 +396,30 @@ function AnalyticsPage() {
           <>
             {/* Client Performance */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
                 <h3 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
                   <FiAward className="w-5 h-5 text-yellow-500" />
-                  Top Clients
+                  <span className="whitespace-nowrap">Top Clients</span>
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto pr-2 -mr-2">
                   {analytics.clientPerformance.topClients.length > 0 ? (
                     analytics.clientPerformance.topClients.map((client, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <div className="truncate">
-                          <p className="font-medium truncate">{client.name}</p>
-                          <p className="text-sm text-gray-500">{client.projectCount} project{client.projectCount !== 1 ? 's' : ''}</p>
+                      <div key={index} className="flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="font-medium text-sm sm:text-base truncate" title={client.name}>
+                            {client.name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {client.projectCount} project{client.projectCount !== 1 ? 's' : ''}
+                          </p>
                         </div>
-                        <div className="text-right">
-                          <p className="font-bold">${client.totalEarnings.toLocaleString()}</p>
-                          <p className="text-xs text-gray-500">${Math.round(client.avgProjectValue)}/project</p>
+                        <div className="text-right whitespace-nowrap pl-2">
+                          <p className="font-bold text-sm sm:text-base">
+                            ${client.totalEarnings.toLocaleString()}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            ${Math.round(client.avgProjectValue).toLocaleString()}/project
+                          </p>
                         </div>
                       </div>
                     ))
@@ -439,20 +429,22 @@ function AnalyticsPage() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
                 <h3 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
                   <FiUsers className="w-5 h-5 text-blue-500" />
-                  Client Base
+                  <span className="whitespace-nowrap">Client Base</span>
                 </h3>
-                <div className="space-y-6">
-                  <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="bg-blue-50 p-3 sm:p-4 rounded-lg">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-gray-700">New Clients</span>
-                      <span className="text-lg font-bold">{analytics.clientPerformance.newClients}</span>
+                      <span className="text-xs sm:text-sm font-medium text-gray-700">New Clients</span>
+                      <span className="text-base sm:text-lg font-bold">
+                        {analytics.clientPerformance.newClients.toLocaleString()}
+                      </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
                       <div 
-                        className="bg-blue-500 h-2 rounded-full" 
+                        className="bg-blue-500 h-full rounded-full" 
                         style={{ 
                           width: `${Math.min(100, analytics.clientPerformance.newClients > 0 ? 
                             (analytics.clientPerformance.newClients / (analytics.clientPerformance.newClients + analytics.clientPerformance.repeatClients)) * 100 : 0)}%` 
@@ -461,14 +453,16 @@ function AnalyticsPage() {
                     </div>
                   </div>
                   
-                  <div className="bg-purple-50 p-4 rounded-lg">
+                  <div className="bg-purple-50 p-3 sm:p-4 rounded-lg">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-gray-700">Repeat Clients</span>
-                      <span className="text-lg font-bold">{analytics.clientPerformance.repeatClients}</span>
+                      <span className="text-xs sm:text-sm font-medium text-gray-700">Repeat Clients</span>
+                      <span className="text-base sm:text-lg font-bold">
+                        {analytics.clientPerformance.repeatClients.toLocaleString()}
+                      </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
                       <div 
-                        className="bg-purple-500 h-2 rounded-full" 
+                        className="bg-purple-500 h-full rounded-full" 
                         style={{ 
                           width: `${Math.min(100, analytics.clientPerformance.repeatClients > 0 ? 
                             (analytics.clientPerformance.repeatClients / (analytics.clientPerformance.newClients + analytics.clientPerformance.repeatClients)) * 100 : 0)}%` 
@@ -477,8 +471,8 @@ function AnalyticsPage() {
                     </div>
                   </div>
                   
-                  <div className="text-center pt-2">
-                    <p className="text-sm text-gray-500">
+                  <div className="text-center pt-1 sm:pt-2">
+                    <p className="text-xs sm:text-sm text-gray-500">
                       {analytics.clientPerformance.repeatClients > 0 ? 
                         `${Math.round((analytics.clientPerformance.repeatClients / (analytics.clientPerformance.newClients + analytics.clientPerformance.repeatClients)) * 100)}% client retention` :
                         'Track repeat business to see retention rate'}
@@ -487,43 +481,48 @@ function AnalyticsPage() {
                 </div>
               </div>
               
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
                 <h3 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
                   <FiTrendingUp className="w-5 h-5 text-green-500" />
-                  Income Trends
+                  <span className="whitespace-nowrap">Income Trends</span>
                 </h3>
                 <div className="space-y-4">
-                  <div className="bg-green-50 p-4 rounded-lg">
+                  <div className="bg-green-50 p-3 sm:p-4 rounded-lg">
                     <div className="flex justify-between items-center">
                       <div>
-                        <p className="text-sm font-medium text-gray-700">Monthly Growth</p>
-                        <p className="text-2xl font-bold">
+                        <p className="text-xs sm:text-sm font-medium text-gray-700">Monthly Growth</p>
+                        <p className="text-xl sm:text-2xl font-bold">
                           {analytics.incomeTrends.growthRate >= 0 ? '+' : ''}
-                          {analytics.incomeTrends.growthRate}%
+                          {typeof analytics.incomeTrends.growthRate === 'number' ? 
+                            `${Math.round(analytics.incomeTrends.growthRate * 10) / 10}%` : 'N/A'}
                         </p>
                       </div>
-                      <div className={`p-2 rounded-full ${analytics.incomeTrends.growthRate >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                        <FiTrendingUp className={`w-6 h-6 ${analytics.incomeTrends.growthRate < 0 ? 'transform rotate-180' : ''}`} />
+                      <div className={`p-1.5 sm:p-2 rounded-full ${analytics.incomeTrends.growthRate >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                        <FiTrendingUp className={`w-5 h-5 sm:w-6 sm:h-6 ${analytics.incomeTrends.growthRate < 0 ? 'transform rotate-180' : ''}`} />
                       </div>
                     </div>
                   </div>
                   
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-medium text-gray-700">Top Platforms</h4>
+                  <div className="space-y-2 sm:space-y-3">
+                    <h4 className="text-xs sm:text-sm font-medium text-gray-700">Top Platforms</h4>
                     {Object.entries(analytics.incomeTrends.platformComparison).length > 0 ? (
-                      <div className="space-y-2">
+                      <div className="space-y-1.5 sm:space-y-2">
                         {Object.entries(analytics.incomeTrends.platformComparison)
                           .sort((a, b) => b[1] - a[1])
                           .slice(0, 3)
                           .map(([platform, amount], i) => (
                             <div key={i} className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600">{platform}</span>
-                              <span className="text-sm font-medium">${amount.toLocaleString()}</span>
+                              <span className="text-xs sm:text-sm text-gray-600 truncate pr-2">
+                                {platform}
+                              </span>
+                              <span className="text-xs sm:text-sm font-medium whitespace-nowrap">
+                                ${amount.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                              </span>
                             </div>
                           ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-gray-400">No platform data available</p>
+                      <p className="text-xs sm:text-sm text-gray-400">No platform data available</p>
                     )}
                   </div>
                 </div>
