@@ -19,7 +19,6 @@ const calculatePlatformComparison = (incomes) => {
   const platforms = {};
   incomes.forEach(income => {
     if (income.platform) {
-      // Convert platform name to title case for consistency
       const platformName = income.platform.toLowerCase()
         .split(' ')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -33,7 +32,6 @@ const calculatePlatformComparison = (incomes) => {
 const calculateMonthlyGrowth = (incomes) => {
   const monthlyData = {};
   
-  // Group by month
   incomes.forEach(income => {
     if (income.date) {
       const date = income.date.toDate ? income.date.toDate() : new Date(income.date);
@@ -45,11 +43,9 @@ const calculateMonthlyGrowth = (incomes) => {
     }
   });
   
-  // Sort months
   const sortedMonths = Object.keys(monthlyData).sort();
   if (sortedMonths.length < 2) return 0;
   
-  // Calculate growth rate
   const currentMonth = sortedMonths[sortedMonths.length - 1];
   const previousMonth = sortedMonths[sortedMonths.length - 2];
   const currentAmount = monthlyData[currentMonth];
@@ -67,13 +63,13 @@ const calculateSeasonalPatterns = (incomes) => {
     if (income.date) {
       try {
         const date = income.date.toDate ? income.date.toDate() : new Date(income.date);
-        if (!isNaN(date.getTime())) { // Check if date is valid
+        if (!isNaN(date.getTime())) {
           const month = date.getMonth();
           monthlyTotals[month] += parseFloat(income.amount) || 0;
           monthlyCounts[month]++;
         }
       } catch (e) {
-
+        console.error("Invalid date format:", e);
       }
     }
   });
@@ -109,7 +105,6 @@ function AnalyticsPage() {
   });
 
   useEffect(() => {
-
     const fetchAnalytics = async () => {
       if (!currentUser || !isPro) {
         setIsLoading(false);
@@ -119,9 +114,6 @@ function AnalyticsPage() {
       setIsLoading(true);
       try {
         const now = new Date();
-        
-        // First, fetch all records
-
         const q = query(
           collection(db, 'incomes'),
           where('userId', '==', currentUser.uid),
@@ -129,8 +121,6 @@ function AnalyticsPage() {
         );
         
         const querySnapshot = await getDocs(q);
-        
-        // Process all records first
         const allIncomes = [];
         querySnapshot.forEach((doc) => {
           const data = doc.data();
@@ -142,11 +132,9 @@ function AnalyticsPage() {
           });
         });
         
-        // Process the filtered incomes
         const currentMonth = now.getMonth();
         const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
         
-        // Calculate filter date based on timeframe
         let filterDate = null;
         if (timeframe !== 'all') {
           filterDate = new Date(now);
@@ -165,19 +153,13 @@ function AnalyticsPage() {
           }
         }
         
-
-        
-        // Filter incomes by date if needed
         const filteredIncomes = filterDate 
           ? allIncomes.filter(income => {
-              const incomeDate = income.date?.toDate ? income.date.toDate() : new Date(income.date);
+              const incomeDate = income.date;
               return incomeDate >= filterDate && incomeDate <= now;
             })
           : [...allIncomes];
         
-
-        
-        // Initialize variables for processing
         const incomes = filteredIncomes;
         let recordCount = 0;
         const clients = new Map();
@@ -189,17 +171,13 @@ function AnalyticsPage() {
           try {
             recordCount++;
             
-            // Parse and validate date
             let date = income.date;
             if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
-
               date = new Date();
             }
             
-            // Ensure date is not in the future
             const now = new Date();
             if (date > now) {
-
               date = new Date(now);
             }
             
@@ -207,20 +185,16 @@ function AnalyticsPage() {
             const clientName = income.client || 'Unknown';
             const platform = income.platform || 'Other';
             
-            // Track client data
             const clientData = clients.get(clientName) || { total: 0, count: 0 };
             clientData.total += amount;
             clientData.count += 1;
             clients.set(clientName, clientData);
             
-            // Track total earnings
             totalEarnings += amount;
             
-            // Track monthly earnings
             const month = date.getMonth();
             monthlyEarnings[month] = (monthlyEarnings[month] || 0) + amount;
             
-            // Prepare income record
             const incomeRecord = {
               id: income.id,
               amount: amount,
@@ -236,11 +210,10 @@ function AnalyticsPage() {
             processedIncomes.push(incomeRecord);
             
           } catch (error) {
-
+            console.error("Error processing income record:", error);
           }
         }
 
-        // Process client data
         const sortedClients = Array.from(clients.entries())
           .map(([name, data]) => ({
             name,
@@ -250,7 +223,6 @@ function AnalyticsPage() {
           }))
           .sort((a, b) => b.totalEarnings - a.totalEarnings);
 
-        // Calculate growth rate (month over month)
         const currentMonthEarnings = monthlyEarnings[currentMonth] || 0;
         const previousMonthEarnings = monthlyEarnings[prevMonth] || 0;
         let growthRate = 0;
@@ -258,16 +230,10 @@ function AnalyticsPage() {
           growthRate = ((currentMonthEarnings - previousMonthEarnings) / previousMonthEarnings) * 100;
         }
 
-        // Calculate platform comparison
         const platformComparison = calculatePlatformComparison(processedIncomes);
-        
-        // Calculate monthly growth
         const monthlyGrowth = calculateMonthlyGrowth(processedIncomes);
-        
-        // Calculate seasonal patterns
         const seasonalPatterns = calculateSeasonalPatterns(processedIncomes);
         
-        // Calculate last 3 months average for projections
         const last3MonthsEarnings = [
           monthlyEarnings[(currentMonth - 2 + 12) % 12] || 0,
           monthlyEarnings[(currentMonth - 1 + 12) % 12] || 0,
@@ -275,7 +241,6 @@ function AnalyticsPage() {
         ];
         const last3MonthsAverage = last3MonthsEarnings.reduce((sum, val) => sum + val, 0) / 3;
         
-        // Determine best time to work based on seasonal patterns
         let bestMonth = 'N/A';
         if (seasonalPatterns.length > 0) {
           const bestMonthIndex = seasonalPatterns.reduce(
@@ -286,7 +251,6 @@ function AnalyticsPage() {
           bestMonth = new Date(0, bestMonthIndex, 1).toLocaleString('default', { month: 'long' });
         }
         
-        // Update analytics state with the correct structure
         setAnalytics({
           clientPerformance: {
             topClients: sortedClients.slice(0, 5).map(client => ({
@@ -304,16 +268,16 @@ function AnalyticsPage() {
             seasonalPatterns: seasonalPatterns
           },
           predictions: {
-            projectedEarnings: Math.round(last3MonthsAverage * 1.1), // 10% growth projection
-            goalProgress: Math.min(100, Math.round((totalEarnings / 10000) * 100)), // Example $10k goal
-            confidence: Math.min(95, Math.max(70, Math.floor(processedIncomes.length / 3 * 100))), // Confidence based on data points
+            projectedEarnings: Math.round(last3MonthsAverage * 1.1),
+            goalProgress: Math.min(100, Math.round((totalEarnings / 10000) * 100)),
+            confidence: Math.min(95, Math.max(70, Math.floor(processedIncomes.length / 3 * 100))),
             bestTimeToWork: bestMonth
           }
         });
         
         setIsLoading(false);
       } catch (error) {
-        // Error handling is silent in production
+        console.error("Error fetching analytics:", error);
         setIsLoading(false);
       }
     };
@@ -363,7 +327,7 @@ function AnalyticsPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Business Insights</h1>
             <p className="text-gray-600">Data-driven analytics to grow your freelance business</p>
@@ -394,53 +358,64 @@ function AnalyticsPage() {
           </div>
         ) : (
           <>
-            {/* Client Performance */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {/* Client Performance Section */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+              {/* Top Clients Card */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                <h3 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
+                <h3 className="font-medium text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
                   <FiAward className="w-5 h-5 text-yellow-500" />
-                  <span className="whitespace-nowrap">Top Clients</span>
+                  <span>Top Clients</span>
                 </h3>
-                <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto pr-2 -mr-2">
+                <div className="space-y-2 sm:space-y-3 max-h-[300px] overflow-y-auto pr-2 -mr-2">
                   {analytics.clientPerformance.topClients.length > 0 ? (
                     analytics.clientPerformance.topClients.map((client, index) => (
-                      <div key={index} className="flex items-center justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="font-medium text-sm sm:text-base truncate" title={client.name}>
+                      <div 
+                        key={index} 
+                        className="flex items-center justify-between gap-2 p-2 sm:p-3 hover:bg-gray-50 rounded-lg"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p 
+                            className="font-medium text-sm sm:text-base truncate" 
+                            title={client.name}
+                          >
                             {client.name}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 mt-1">
                             {client.projectCount} project{client.projectCount !== 1 ? 's' : ''}
                           </p>
                         </div>
-                        <div className="text-right whitespace-nowrap pl-2">
-                          <p className="font-bold text-sm sm:text-base">
+                        <div className="text-right min-w-[90px] sm:min-w-[110px]">
+                          <p className="font-bold text-sm sm:text-base text-gray-800">
                             ${client.totalEarnings.toLocaleString()}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 mt-1">
                             ${Math.round(client.avgProjectValue).toLocaleString()}/project
                           </p>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <p className="text-gray-400 text-sm">No client data available</p>
+                    <p className="text-gray-400 text-sm p-2">No client data available</p>
                   )}
                 </div>
               </div>
 
+              {/* Client Base Card */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                <h3 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
+                <h3 className="font-medium text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
                   <FiUsers className="w-5 h-5 text-blue-500" />
-                  <span className="whitespace-nowrap">Client Base</span>
+                  <span>Client Base</span>
                 </h3>
-                <div className="space-y-4 sm:space-y-6">
-                  <div className="bg-blue-50 p-3 sm:p-4 rounded-lg">
-                    <div className="flex justify-between items-center mb-2">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <div className="flex justify-between items-center mb-1">
                       <span className="text-xs sm:text-sm font-medium text-gray-700">New Clients</span>
-                      <span className="text-base sm:text-lg font-bold">
-                        {analytics.clientPerformance.newClients.toLocaleString()}
+                      <span className="text-base sm:text-lg font-bold text-gray-800">
+                        {analytics.clientPerformance.newClients}
                       </span>
+                    </div>
+                    <div className="text-xs text-gray-500 mb-2">
+                      First-time clients
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
                       <div 
@@ -453,12 +428,15 @@ function AnalyticsPage() {
                     </div>
                   </div>
                   
-                  <div className="bg-purple-50 p-3 sm:p-4 rounded-lg">
-                    <div className="flex justify-between items-center mb-2">
+                  <div className="bg-purple-50 p-3 rounded-lg">
+                    <div className="flex justify-between items-center mb-1">
                       <span className="text-xs sm:text-sm font-medium text-gray-700">Repeat Clients</span>
-                      <span className="text-base sm:text-lg font-bold">
-                        {analytics.clientPerformance.repeatClients.toLocaleString()}
+                      <span className="text-base sm:text-lg font-bold text-gray-800">
+                        {analytics.clientPerformance.repeatClients}
                       </span>
+                    </div>
+                    <div className="text-xs text-gray-500 mb-2">
+                      Returning clients
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
                       <div 
@@ -471,127 +449,138 @@ function AnalyticsPage() {
                     </div>
                   </div>
                   
-                  <div className="text-center pt-1 sm:pt-2">
-                    <p className="text-xs sm:text-sm text-gray-500">
-                      {analytics.clientPerformance.repeatClients > 0 ? 
-                        `${Math.round((analytics.clientPerformance.repeatClients / (analytics.clientPerformance.newClients + analytics.clientPerformance.repeatClients)) * 100)}% client retention` :
-                        'Track repeat business to see retention rate'}
+                  <div className="text-center pt-1">
+                    <p className="text-xs sm:text-sm text-gray-600">
+                      {analytics.clientPerformance.repeatClients > 0 ? (
+                        <>
+                          <span className="font-medium text-gray-800">
+                            {Math.round((analytics.clientPerformance.repeatClients / (analytics.clientPerformance.newClients + analytics.clientPerformance.repeatClients)) * 100)}%
+                          </span> client retention
+                        </>
+                      ) : (
+                        'Track repeat business to see retention'
+                      )}
                     </p>
                   </div>
                 </div>
               </div>
               
+              {/* Income Trends Card */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                <h3 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
+                <h3 className="font-medium text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
                   <FiTrendingUp className="w-5 h-5 text-green-500" />
-                  <span className="whitespace-nowrap">Income Trends</span>
+                  <span>Income Trends</span>
                 </h3>
-                <div className="space-y-4">
-                  <div className="bg-green-50 p-3 sm:p-4 rounded-lg">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="bg-green-50 p-3 rounded-lg">
                     <div className="flex justify-between items-center">
                       <div>
                         <p className="text-xs sm:text-sm font-medium text-gray-700">Monthly Growth</p>
-                        <p className="text-xl sm:text-2xl font-bold">
+                        <p className="text-xl sm:text-2xl font-bold text-gray-800">
                           {analytics.incomeTrends.growthRate >= 0 ? '+' : ''}
                           {typeof analytics.incomeTrends.growthRate === 'number' ? 
                             `${Math.round(analytics.incomeTrends.growthRate * 10) / 10}%` : 'N/A'}
                         </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          vs. previous month
+                        </p>
                       </div>
                       <div className={`p-1.5 sm:p-2 rounded-full ${analytics.incomeTrends.growthRate >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                        <FiTrendingUp className={`w-5 h-5 sm:w-6 sm:h-6 ${analytics.incomeTrends.growthRate < 0 ? 'transform rotate-180' : ''}`} />
+                        <FiTrendingUp className={`w-5 h-5 ${analytics.incomeTrends.growthRate < 0 ? 'transform rotate-180' : ''}`} />
                       </div>
                     </div>
                   </div>
                   
-                  <div className="space-y-2 sm:space-y-3">
+                  <div className="space-y-2">
                     <h4 className="text-xs sm:text-sm font-medium text-gray-700">Top Platforms</h4>
                     {Object.entries(analytics.incomeTrends.platformComparison).length > 0 ? (
-                      <div className="space-y-1.5 sm:space-y-2">
+                      <div className="space-y-2">
                         {Object.entries(analytics.incomeTrends.platformComparison)
                           .sort((a, b) => b[1] - a[1])
                           .slice(0, 3)
                           .map(([platform, amount], i) => (
-                            <div key={i} className="flex items-center justify-between">
+                            <div key={i} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
                               <span className="text-xs sm:text-sm text-gray-600 truncate pr-2">
                                 {platform}
                               </span>
-                              <span className="text-xs sm:text-sm font-medium whitespace-nowrap">
+                              <span className="text-xs sm:text-sm font-medium text-gray-800 whitespace-nowrap">
                                 ${amount.toLocaleString(undefined, {maximumFractionDigits: 0})}
                               </span>
                             </div>
                           ))}
                       </div>
                     ) : (
-                      <p className="text-xs sm:text-sm text-gray-400">No platform data available</p>
+                      <p className="text-xs sm:text-sm text-gray-400 p-2">No platform data available</p>
                     )}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Core Metrics */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h3 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
+            {/* Core Metrics Section */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+              {/* Projected Earnings Card */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+                <h3 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
                   <FiPieChart className="w-5 h-5 text-purple-500" />
-                  Projected Earnings
+                  <span>Projected Earnings</span>
                 </h3>
-                <div className="space-y-4">
-                  <p className="text-3xl font-bold text-gray-900">
+                <div className="space-y-2 sm:space-y-3">
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-800">
                     ${analytics.predictions.projectedEarnings.toLocaleString()}
                   </p>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
                       {analytics.predictions.confidence}% confidence
                     </span>
-                    <span>Next 30 days</span>
+                    <span className="text-xs sm:text-sm text-gray-600">
+                      Next 30 days
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h3 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
+              {/* Income Goal Card */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+                <h3 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
                   <FiTarget className="w-5 h-5 text-blue-500" />
-                  Income Goal
+                  <span>Income Goal</span>
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div className="relative pt-1">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="text-xs font-semibold inline-block text-blue-600">
-                          {analytics.predictions.goalProgress}%
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xs font-semibold inline-block text-gray-600">
-                          $10,000
-                        </span>
-                      </div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-semibold text-blue-600">
+                        {analytics.predictions.goalProgress}%
+                      </span>
+                      <span className="text-xs font-semibold text-gray-600">
+                        $10,000
+                      </span>
                     </div>
-                    <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-200">
+                    <div className="overflow-hidden h-2 mb-2 text-xs flex rounded bg-blue-200">
                       <div
                         style={{ width: `${analytics.predictions.goalProgress}%` }}
                         className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"
                       ></div>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs sm:text-sm text-gray-600">
                     {analytics.predictions.goalProgress >= 100 ? (
-                      '🎉 Goal achieved! Set a new goal in settings.'
+                      '🎉 Goal achieved!'
                     ) : (
-                      `$${10000 - analytics.predictions.projectedEarnings.toLocaleString()} to go this month`
+                      `$${(10000 - analytics.predictions.projectedEarnings).toLocaleString()} to go`
                     )}
                   </p>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h3 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
+              {/* Best Time to Work Card */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+                <h3 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
                   <FiCalendar className="w-5 h-5 text-orange-500" />
-                  Best Time to Work
+                  <span>Best Time to Work</span>
                 </h3>
-                <div className="space-y-4">
-                  <p className="text-3xl font-bold text-gray-900">
+                <div className="space-y-2 sm:space-y-3">
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-800">
                     {analytics.incomeTrends.seasonalPatterns.length > 0 ? (
                       new Date(0, analytics.incomeTrends.seasonalPatterns.reduce(
                         (bestMonth, current, i, arr) => 
@@ -599,10 +588,10 @@ function AnalyticsPage() {
                       ), 1).toLocaleString('default', { month: 'long' })
                     ) : 'N/A'}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs sm:text-sm text-gray-600">
                     {analytics.incomeTrends.seasonalPatterns.length > 0 ?
-                      'Your highest earning month on average' :
-                      'Track more income to see seasonal patterns'}
+                      'Your highest earning month' :
+                      'Track more income to see patterns'}
                   </p>
                 </div>
               </div>
