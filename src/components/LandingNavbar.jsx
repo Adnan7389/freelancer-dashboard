@@ -21,7 +21,7 @@ export default function LandingNavbar() {
   // If we are on the home page, they'll scroll to sections
   const navItems = [
     { id: 'features', label: 'Features' },
-    { id: 'pricing', label: 'Pricing' },
+    { path: '/pricing', label: 'Pricing' },
     { id: 'about', label: 'About' },
   ];
 
@@ -37,9 +37,9 @@ export default function LandingNavbar() {
         <nav className="hidden md:flex space-x-8">
           {navItems.map((item) => (
             <Link 
-              key={item.id}
-              to={isHomePage ? '#' : `/#${item.id}`}
-              onClick={(e) => isHomePage && scrollToSection(e, item.id)}
+              key={item.id || item.path}
+              to={item.path || (isHomePage ? '#' : `/#${item.id}`)}
+              onClick={(e) => item.id && isHomePage && scrollToSection(e, item.id)}
               className="text-gray-600 hover:text-blue-600 transition-colors"
             >
               {item.label}

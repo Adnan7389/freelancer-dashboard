@@ -18,6 +18,7 @@ import IncomeToolsPage from "./pages/IncomeToolsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import Legal from "./pages/Legal";
 import FAQPage from "./pages/FAQPage";
+import PricingPage from "./pages/PricingPage";
 import { Toaster } from "react-hot-toast";
 import { useAuth } from "./hooks/useAuth";
 
@@ -63,6 +64,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/legal" element={<Legal />} />
+              <Route path="/pricing" element={<PricingPage />} />
               <Route path="/faq" element={<FAQPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
