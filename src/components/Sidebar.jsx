@@ -93,6 +93,13 @@ function Sidebar({ currentUser, sidebarOpen, onLogout }) {
           >
             <span className="ml-1">Legal</span>
           </Link>
+          
+          <Link
+            to="/feedback"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors group text-sm font-medium"
+          >
+            <span className="ml-1">Send Feedback</span>
+          </Link>
 
           {!isPro && (
             <a
