@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FiUpload, FiDownload, FiFilter, FiFileText, FiCalendar } from "react-icons/fi";
+import { FiUpload, FiDownload, FiFilter, FiFileText, FiCalendar, FiCheck, FiCheckCircle } from "react-icons/fi";
 import { useProStatus } from "../hooks/useProStatus";
 import { exportIncomesToCSV, importCSVToIncomes } from "../utils/csvUtils";
 import toast from "react-hot-toast";
@@ -22,26 +22,22 @@ function IncomeDataTools() {
 
   const allMonths = Array.from({ length: 12 }, (_, i) => ({
     name: dayjs().month(i).format("MMMM"),
-    value: i + 1
+    value: i + 1,
+    shortName: dayjs().month(i).format("MMM") // Added short month names for mobile
   }));
 
   const toggleMonth = (month) => {
-    // If 'Select All' is clicked
     if (month === 'all') {
       const allMonthValues = allMonths.map(m => m.value);
       const newSelection = selectedMonths.length === allMonthValues.length ? [] : allMonthValues;
       setSelectedMonths(newSelection);
       setIsSelectAll(!isSelectAll);
     } else {
-      // Toggle individual month
       setSelectedMonths(prev => {
         const newSelection = prev.includes(month)
           ? prev.filter(m => m !== month)
           : [...prev, month];
-        
-        // Update 'Select All' checkbox state
         setIsSelectAll(newSelection.length === allMonths.length);
-        
         return newSelection;
       });
     }
@@ -67,7 +63,6 @@ function IncomeDataTools() {
 
     try {
       setLoading(true);
-      // Convert month names to numbers (e.g., 'July' -> 7, 'August' -> 8)
       const monthNumbers = selectedMonths.map(month => 
         typeof month === 'string' ? new Date(`${month} 1, 2000`).getMonth() + 1 : month
       );
@@ -97,7 +92,7 @@ function IncomeDataTools() {
     } catch (err) {
       toast.error("Import failed: " + err.message);
     } finally {
-      e.target.value = ''; // Reset file input
+      e.target.value = '';
       setLoading(false);
     }
   };
@@ -112,12 +107,10 @@ function IncomeDataTools() {
       try {
         setIsLoadingCount(true);
         const incomeRef = collection(db, "incomes");
-        
-        // First, check if we can find any records without date filtering
         const allRecordsQuery = query(
           incomeRef,
           where("userId", "==", currentUser.uid),
-          limit(5) // Just get a few records to check
+          limit(5)
         );
         
         const allRecords = await getDocs(allRecordsQuery);
@@ -128,7 +121,6 @@ function IncomeDataTools() {
           return;
         }
         
-        // Query all records for the user, we'll filter by date in memory
         const q = query(
           incomeRef,
           where("userId", "==", currentUser.uid)
@@ -136,7 +128,6 @@ function IncomeDataTools() {
         
         const snapshot = await getDocs(q);
         
-        // Filter client-side by selected months and year
         const filtered = snapshot.docs.filter(doc => {
           const data = doc.data();
           if (!data.date) {
@@ -144,23 +135,18 @@ function IncomeDataTools() {
             return false;
           }
           
-          // Parse the date string (format: 'YYYY-MM-DD')
           const dateStr = data.date;
           const [year, month, day] = dateStr.split('-').map(Number);
           
-          // Validate the date
           const date = new Date(year, month - 1, day);
           if (isNaN(date.getTime())) {
             console.warn('Invalid date format:', data.date, 'in document:', doc.id);
             return false;
           }
           
-          // Get the month and year from the date
-          const monthNum = date.getMonth() + 1; // Convert to 1-12
+          const monthNum = date.getMonth() + 1;
           const yearNum = date.getFullYear();
           
-          // Check if the record's year matches the selected year
-          // and if the record's month is in the selected months
           const isInSelectedYear = yearNum === selectedYear;
           const isInSelectedMonths = selectedMonths.includes(monthNum);
           
@@ -182,33 +168,41 @@ function IncomeDataTools() {
   if (!isPro) return null;
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
+    <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md border border-gray-100 space-y-6 max-w-4xl mx-auto">
+      {/* Header Section */}
       <div className="space-y-2">
         <div className="flex items-center gap-3">
-          <FiFileText className="text-2xl text-blue-500" />
-          <h3 className="text-xl font-bold text-gray-800">Income Data Tools</h3>
+          <div className="p-2 bg-indigo-50 rounded-lg">
+            <FiFileText className="text-xl text-indigo-600" />
+          </div>
+          <div>
+            <h3 className="text-lg sm:text-xl font-bold text-gray-800">Income Data Tools</h3>
+            <p className="text-xs sm:text-sm text-gray-500">
+              Export income records by month or import from platform reports
+            </p>
+          </div>
         </div>
-        <p className="text-sm text-gray-600">
-          Export income records by month or import from platform reports
-        </p>
       </div>
 
-      {/* Year Selector */}
+      {/* Year Selection - Improved Mobile Visibility */}
       <div className="space-y-3">
         <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-          <FiCalendar className="text-gray-500" />
+          <div className="p-1.5 bg-blue-50 rounded-md">
+            <FiCalendar className="text-blue-600" />
+          </div>
           Select Year
         </label>
-        <div className="flex gap-2 overflow-x-auto pb-2">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
           {years.map((year) => (
             <button
               key={year}
               onClick={() => setSelectedYear(year)}
-              className={`px-4 py-2 rounded-lg border transition-colors whitespace-nowrap ${
+              className={`px-3 sm:px-4 py-2 rounded-lg border transition-all duration-200 whitespace-nowrap min-w-[70px] sm:min-w-[80px] text-center text-sm sm:text-base ${
                 selectedYear === year
-                  ? 'bg-blue-50 border-blue-200 text-blue-700 font-medium'
-                  : 'bg-white border-gray-200 hover:bg-gray-50'
+                  ? 'bg-blue-100 border-blue-300 text-blue-700 font-semibold shadow-sm'
+                  : 'bg-white border-gray-200 hover:bg-gray-50 text-gray-600'
               }`}
+              aria-label={`Select year ${year}`}
             >
               {year}
             </button>
@@ -216,61 +210,85 @@ function IncomeDataTools() {
         </div>
       </div>
 
-      {/* Month Selector */}
+      {/* Month Selection - Improved Mobile Visibility */}
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-            <FiFilter className="text-gray-500" />
-            Select Months ({selectedYear})
+            <div className="p-1.5 bg-purple-50 rounded-md">
+              <FiFilter className="text-purple-600" />
+            </div>
+            <span className="whitespace-nowrap">Select Months ({selectedYear})</span>
           </label>
           <button
             onClick={handleSelectAll}
-            className="text-sm text-blue-600 hover:text-blue-800"
+            className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1"
+            aria-label={isSelectAll ? 'Deselect all months' : 'Select all months'}
           >
-            {isSelectAll ? 'Deselect All' : 'Select All'}
+            {isSelectAll ? (
+              <>
+                <FiCheckCircle className="text-green-500" /> Deselect All
+              </>
+            ) : (
+              'Select All'
+            )}
           </button>
         </div>
         
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
           {allMonths.map((month) => (
             <button
               key={month.value}
               onClick={() => toggleMonth(month.value)}
               disabled={loading}
-              className={`flex items-center justify-center py-2 px-3 rounded-lg border transition-colors ${
+              className={`flex flex-col items-center justify-center py-2 px-1 sm:px-3 rounded-lg border transition-all duration-200 min-h-[60px] ${
                 selectedMonths.includes(month.value)
-                  ? 'bg-blue-50 border-blue-200 text-blue-700'
-                  : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                  ? 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm'
+                  : 'bg-gray-50 border-gray-200 hover:bg-gray-100 text-gray-600'
               } ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+              aria-label={`${selectedMonths.includes(month.value) ? 'Selected' : 'Select'} ${month.name}`}
             >
-              <span className="text-sm font-medium">{month.name}</span>
+              <span className="text-xs font-medium sm:hidden">{month.shortName}</span>
+              <span className="hidden sm:inline text-sm font-medium">{month.name}</span>
+              {selectedMonths.includes(month.value) && (
+                <FiCheck className="text-indigo-600 mt-1" size={14} />
+              )}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Preview Info */}
+      {/* Record Count Preview */}
       {isLoadingCount ? (
-        <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-          <p className="text-sm text-blue-700">
+        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 animate-pulse">
+          <p className="text-xs sm:text-sm text-blue-700 flex items-center gap-2">
+            <svg className="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
             Loading record count...
           </p>
         </div>
       ) : recordCount !== null && (
         <div className={`p-3 rounded-lg border ${
           recordCount > 0 
-            ? 'bg-blue-50 border-blue-100' 
-            : 'bg-amber-50 border-amber-100'
+            ? 'bg-blue-50 border-blue-200' 
+            : 'bg-amber-50 border-amber-200'
         }`}>
-          <p className={`text-sm ${
+          <p className={`text-xs sm:text-sm flex items-center gap-2 ${
             recordCount > 0 ? 'text-blue-700' : 'text-amber-700'
           }`}>
             {recordCount > 0 ? (
-              <span>
-                Found <span className="font-medium">{recordCount}</span> record{recordCount !== 1 ? 's' : ''} for {selectedMonths.length} selected month{selectedMonths.length !== 1 ? 's' : ''} in {selectedYear}
-              </span>
+              <>
+                <FiCheckCircle className="text-blue-500" />
+                <span>
+                  Found <span className="font-semibold">{recordCount}</span> record{recordCount !== 1 ? 's' : ''} for {selectedMonths.length} selected month{selectedMonths.length !== 1 ? 's' : ''} in {selectedYear}
+                </span>
+              </>
             ) : (
-              <span>No records found for the selected period</span>
+              <>
+                <FiCheckCircle className="text-amber-500" />
+                <span>No records found for the selected period</span>
+              </>
             )}
           </p>
         </div>
@@ -281,22 +299,23 @@ function IncomeDataTools() {
         <button
           onClick={handleExport}
           disabled={loading || selectedMonths.length === 0 || recordCount === 0}
-          className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors ${
-            loading || selectedMonths.length === 0
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700 text-white'
+          className={`flex items-center justify-center gap-2 px-4 py-2.5 sm:py-3 rounded-lg font-medium transition-all duration-200 text-sm sm:text-base ${
+            loading || selectedMonths.length === 0 || recordCount === 0
+              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+              : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-lg'
           }`}
+          aria-label="Export selected income data"
         >
-          <FiDownload size={18} />
+          <FiDownload size={16} />
           Export Selected
         </button>
 
-        <label className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors ${
+        <label className={`flex items-center justify-center gap-2 px-4 py-2.5 sm:py-3 rounded-lg font-medium transition-all duration-200 cursor-pointer text-sm sm:text-base ${
           loading
-            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            : 'bg-green-600 hover:bg-green-700 text-white cursor-pointer'
+            ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+            : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md hover:shadow-lg'
         }`}>
-          <FiUpload size={18} />
+          <FiUpload size={16} />
           Import CSV
           <input
             type="file"
@@ -304,13 +323,13 @@ function IncomeDataTools() {
             onChange={handleImport}
             disabled={loading}
             className="hidden"
-            aria-label="Upload CSV file"
+            aria-label="Upload CSV file for import"
           />
         </label>
       </div>
 
       {/* Help Text */}
-      <div className="text-xs text-gray-500">
+      <div className="text-xs text-gray-500 pt-2 border-t border-gray-100">
         <p>Supported formats: CSV exports from Fiverr, Upwork, or custom spreadsheets</p>
       </div>
     </div>
