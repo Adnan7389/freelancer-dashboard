@@ -4,3 +4,4 @@ node_modules/
 .DS_Store
 freelancer-dashboard-*.json
 .firebase/
+scripts/firestore-structure.json

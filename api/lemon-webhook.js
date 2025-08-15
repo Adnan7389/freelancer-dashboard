@@ -1,7 +1,13 @@
 import crypto from "crypto";
 import admin from "firebase-admin";
 
-// Initialize Firebase Admin using Service Account from env
+export const config = {
+  api: {
+    bodyParser: false, // disable body parsing to get raw buffer
+  },
+};
+
+// Initialize Firebase Admin
 if (!admin.apps.length) {
   const serviceAccount = JSON.parse(
     Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT, "base64").toString()
@@ -10,7 +16,6 @@ if (!admin.apps.length) {
     credential: admin.credential.cert(serviceAccount),
   });
 }
-
 const db = admin.firestore();
 
 function verifySignature(rawBody, signature, secret) {
@@ -23,8 +28,18 @@ export default async function handler(req, res) {
     return res.status(405).send("Method Not Allowed");
   }
 
+  // Get raw body as a string
+  const rawBody = await new Promise((resolve) => {
+    let data = "";
+    req.on("data", (chunk) => {
+      data += chunk;
+    });
+    req.on("end", () => {
+      resolve(data);
+    });
+  });
+
   const signature = req.headers["x-signature"];
-  const rawBody = JSON.stringify(req.body);
   const isValid = verifySignature(rawBody, signature, process.env.LEMONSQUEEZY_SECRET);
 
   if (!isValid) {
@@ -32,7 +47,7 @@ export default async function handler(req, res) {
     return res.status(400).send("Invalid signature");
   }
 
-  const event = req.body;
+  const event = JSON.parse(rawBody);
   const type = event.meta?.event_name;
   const userEmail = event.data?.attributes?.user_email;
 
@@ -53,7 +68,7 @@ export default async function handler(req, res) {
     const userDoc = snapshot.docs[0];
     const userRef = userDoc.ref;
 
-    // Events that upgrade to Pro
+    // Upgrade to Pro
     if (
       [
         "order_created",
@@ -67,7 +82,7 @@ export default async function handler(req, res) {
       console.log(`User upgraded to Pro due to ${type}:`, userEmail);
     }
 
-    // Events that downgrade to Free
+    // Downgrade to Free
     if (
       ["subscription_cancelled", "subscription_expired", "subscription_payment_failed"].includes(type)
     ) {
@@ -75,9 +90,9 @@ export default async function handler(req, res) {
       console.log(`User downgraded to Free due to ${type}:`, userEmail);
     }
 
-    res.status(200).send("Webhook handled");
+    return res.status(200).send("Webhook handled");
   } catch (err) {
     console.error("Webhook error:", err);
-    res.status(500).send("Internal server error");
+    return res.status(500).json({ error: "Internal server error" });
   }
 }
