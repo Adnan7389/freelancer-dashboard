@@ -5,3 +5,4 @@ node_modules/
 freelancer-dashboard-*.json
 .firebase/
 scripts/firestore-structure.json
+scripts/sendTestWebhook.js
