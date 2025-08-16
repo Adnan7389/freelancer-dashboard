@@ -2,6 +2,7 @@ import { FiPlus, FiSettings, FiLogOut, FiUser, FiHome, FiTrendingUp, FiPieChart,
 import { FaMoneyBillWave } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useProStatus } from "../hooks/useProStatus";
+import { getCheckoutUrl } from "../utils/getCheckoutUrl";
 
 function Sidebar({ currentUser, sidebarOpen, onLogout }) {
   const isPro = useProStatus();
@@ -100,24 +101,23 @@ function Sidebar({ currentUser, sidebarOpen, onLogout }) {
           >
             <span className="ml-1">Send Feedback</span>
           </Link>
-
-          {!isPro && (
-            <a
-              href="https://trackmyincome.lemonsqueezy.com/buy/fc8795bb-8bc2-483e-badf-a2b2afcfdd30"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between gap-2 mt-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-medium py-2.5 px-4 rounded-lg hover:opacity-90 transition-opacity"
-            >
-              <span className="flex items-center gap-2">
-                <FiPlus />
-                Upgrade to Pro
-              </span>
-              <span className="text-xs bg-yellow-700 text-yellow-100 px-2 py-0.5 rounded-full">
-                $9/month
-              </span>
-            </a>
-          )}
-
+          
+      {!isPro && (
+        <a
+          href={getCheckoutUrl()}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-between gap-2 mt-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-medium py-2.5 px-4 rounded-lg hover:opacity-90 transition-opacity"
+        >
+          <span className="flex items-center gap-2">
+            <FiPlus />
+            Upgrade to Pro
+          </span>
+          <span className="text-xs bg-yellow-700 text-yellow-100 px-2 py-0.5 rounded-full">
+            $5/month
+          </span>
+        </a>
+      )}
           <button
             onClick={onLogout}
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors group mt-2"

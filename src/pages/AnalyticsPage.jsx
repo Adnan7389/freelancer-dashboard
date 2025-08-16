@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useProStatus } from "../hooks/useProStatus";
 import { db } from "../firebase";
+import { getCheckoutUrl } from "../utils/getCheckoutUrl";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { 
   FiTrendingUp, 
@@ -307,18 +308,18 @@ function AnalyticsPage() {
           <h2 className="text-2xl font-bold text-gray-800 mb-3">Advanced Analytics</h2>
           <p className="text-gray-600 mb-6 max-w-md mx-auto">
             Unlock powerful insights with Pro Analytics, including predictive earnings and client segmentation.
-          </p>
-          <a
-            href="https://trackmyincome.lemonsqueezy.com/buy/fc8795bb-8bc2-483e-badf-a2b2afcfdd30"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-medium py-2.5 px-6 rounded-lg hover:opacity-90 transition-opacity"
-          >
-            <span>Upgrade to Pro</span>
-            <span className="text-xs bg-yellow-700 text-yellow-100 px-2 py-0.5 rounded-full">
-              $9/month
-            </span>
-          </a>
+          </p>      
+           <a
+             href={getCheckoutUrl()}
+             target="_blank"
+             rel="noopener noreferrer"
+             className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-medium py-2.5 px-6 rounded-lg hover:opacity-90 transition-opacity"
+           >
+             <span>Upgrade to Pro</span>
+             <span className="text-xs bg-yellow-700 text-yellow-100 px-2 py-0.5 rounded-full">
+               $5/month
+             </span>
+           </a>
         </div>
       </div>
     );

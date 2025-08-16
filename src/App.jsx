@@ -19,6 +19,8 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 import Legal from "./pages/Legal";
 import FAQPage from "./pages/FAQPage";
 import PricingPage from "./pages/PricingPage";
+import Success from "./pages/Success";
+import Cancel from "./pages/Cancel";
 import FeedbackPage from "./pages/FeedbackPage";
 import AdminFeedbackPage from "./pages/AdminFeedbackPage";
 import { Toaster } from "react-hot-toast";
@@ -68,6 +70,8 @@ function App() {
               <Route path="/about" element={<AboutPage />} />
               <Route path="/legal" element={<Legal />} />
               <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/success" element={<Success />} />
+              <Route path="/cancel" element={<Cancel />} />
               <Route path="/faq" element={<FAQPage />} />
               <Route path="/feedback" element={<FeedbackPage />} />
               <Route path="/login" element={<Login />} />
