@@ -1,6 +1,6 @@
 // src/hooks/useProStatus.js
 import { useState, useEffect } from "react";
-import { doc,getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "./useAuth";
 
@@ -11,15 +11,17 @@ export function useProStatus() {
   useEffect(() => {
     if (!currentUser) return;
 
-    const fetchPlan = async () => {
-      const userRef = doc(db, "users", currentUser.uid);
-      const userSnap = await getDoc(userRef);
-      if (userSnap.exists()) {
-        setIsPro(userSnap.data().plan === "pro");
+    // subscribe to real-time updates
+    const userRef = doc(db, "users", currentUser.uid);
+    const unsubscribe = onSnapshot(userRef, (snap) => {
+      if (snap.exists()) {
+        setIsPro(snap.data().plan === "pro");
+      } else {
+        setIsPro(false);
       }
-    };
+    });
 
-    fetchPlan();
+    return () => unsubscribe(); // cleanup listener
   }, [currentUser]);
 
   return isPro;
