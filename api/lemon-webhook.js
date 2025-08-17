@@ -65,8 +65,8 @@ export default async function handler(req, res) {
     const userDoc = snapshot.docs[0];
     const userRef = userDoc.ref;
 
-    // Normalize subscription fields
-    const subscriptionUrl = attrs?.urls?.customer_portal || null;
+    // Use the order URL for subscription management as it provides the full interface
+    const subscriptionUrl = attrs?.urls?.order || attrs?.urls?.update_payment_method || attrs?.urls?.customer_portal || null;
     const subscriptionStatus = attrs?.status_formatted || null;
     const renewsAt = attrs?.renews_at || null;
 
