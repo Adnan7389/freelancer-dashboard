@@ -66,10 +66,7 @@ export default async function handler(req, res) {
     const userRef = userDoc.ref;
 
     // Normalize subscription fields
-    const subscriptionUrl =
-      attrs?.urls?.customer_portal_update_subscription ||
-      attrs?.urls?.customer_portal ||
-      null;
+    const subscriptionUrl = attrs?.urls?.customer_portal || null;
     const subscriptionStatus = attrs?.status_formatted || null;
     const renewsAt = attrs?.renews_at || null;
 
