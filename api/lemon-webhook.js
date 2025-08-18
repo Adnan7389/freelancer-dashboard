@@ -65,12 +65,11 @@ export default async function handler(req, res) {
     const userDoc = snapshot.docs[0];
     const userRef = userDoc.ref;
 
-    // Use the order URL for full subscription management
-    // Construct the order URL using the order_id from the subscription
-    const orderId = attrs?.order_id || attrs?.order_id || null;
+    // Construct order URL for full subscription management (cancel/change plan)
+    const orderId = attrs?.order_id || attrs?.order_id?.toString();
     const subscriptionUrl = orderId 
-      ? `https://app.lemonsqueezy.com/my-orders/order/${orderId}`
-      : attrs?.urls?.update_payment_method || attrs?.urls?.customer_portal || null;
+      ? `https://app.lemonsqueezy.com/my-orders/${orderId}?expires=${Math.floor(Date.now() / 1000) + 86400}` // 24h expiry
+      : attrs?.urls?.customer_portal; // Fallback to customer portal if no order ID
     const subscriptionStatus = attrs?.status_formatted || null;
     const renewsAt = attrs?.renews_at || null;
 
