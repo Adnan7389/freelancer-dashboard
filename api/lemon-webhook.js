@@ -68,7 +68,7 @@ export default async function handler(req, res) {
     // Construct order URL for full subscription management (cancel/change plan)
     const orderId = attrs?.order_id || attrs?.order_id?.toString();
     const subscriptionUrl = orderId 
-      ? `https://app.lemonsqueezy.com/my-orders/${orderId}?expires=${Math.floor(Date.now() / 1000) + 86400}` // 24h expiry
+      ? `https://app.lemonsqueezy.com/my-orders/${orderId}`
       : attrs?.urls?.customer_portal; // Fallback to customer portal if no order ID
     const subscriptionStatus = attrs?.status_formatted || null;
     const renewsAt = attrs?.renews_at || null;
