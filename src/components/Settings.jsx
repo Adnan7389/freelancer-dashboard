@@ -19,7 +19,8 @@ import {
   FiAlertTriangle,
   FiClock,
   FiTrash2,
-  FiLoader
+  FiLoader,
+  FiCreditCard
 } from "react-icons/fi";
 
 function Settings() {
@@ -39,6 +40,11 @@ function Settings() {
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  const [subscriptionUrl, setSubscriptionUrl] = useState(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+  const [renewsAt, setRenewsAt] = useState(null);
+  const [cancelling, setCancelling] = useState(false);
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
@@ -55,6 +61,11 @@ function Settings() {
           const nameVal = docSnap.data()?.name || "";
           setName(nameVal);
           setInitialName(nameVal);
+
+          const userData = docSnap.data();
+          setSubscriptionUrl(userData?.subscriptionUrl || null);
+          setSubscriptionStatus(userData?.subscriptionStatus || null);
+          setRenewsAt(userData?.renewsAt || null);
         }
       };
       fetchName();
@@ -147,6 +158,39 @@ function Settings() {
   const lastLogin = new Date(
     currentUser?.metadata?.lastSignInTime || ""
   ).toLocaleString();
+
+  const handleCancelSubscription = async () => {
+    if (!window.confirm('Are you sure you want to cancel your subscription? You will retain access until the end of your billing period.')) {
+      return;
+    }
+
+    setCancelling(true);
+    try {
+      const idToken = await currentUser.getIdToken();
+      const response = await fetch('/api/cancel-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        }
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to cancel subscription');
+      }
+
+      // Update local state
+      setSubscriptionStatus('cancelled');
+      toast.success('Your subscription has been cancelled. You will retain access until the end of your billing period.');
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
+      toast.error(error.message || 'Failed to cancel subscription');
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-sm border border-gray-100 mt-10 space-y-8">
@@ -306,6 +350,55 @@ function Settings() {
           </div>
         )}
       </div>
+         
+      {/* Manage Subscription Section */}
+      {subscriptionUrl && (
+        <div className="space-y-3 pt-4 border-t border-gray-200">
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <FiCreditCard /> Subscription
+          </label>
+          <p className="text-sm text-gray-600">
+            Status: <strong className={subscriptionStatus === 'cancelled' ? 'text-red-600' : ''}>
+              {subscriptionStatus || "Unknown"}
+            </strong>
+            {renewsAt && subscriptionStatus !== 'cancelled' && (
+              <>
+                {" "}
+                · Next billing:{" "}
+                <strong>{new Date(renewsAt).toLocaleDateString()}</strong>
+              </>
+            )}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={subscriptionUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              <FiCreditCard /> Manage Subscription
+            </a>
+            
+            {subscriptionStatus !== 'cancelled' && (
+              <button
+                onClick={handleCancelSubscription}
+                disabled={cancelling}
+                className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+              >
+                {cancelling ? (
+                  <>
+                    <FiLoader className="animate-spin" /> Cancelling...
+                  </>
+                ) : (
+                  <>
+                    <FiX /> Cancel Subscription
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Last Login Section */}
       <div className="space-y-1">

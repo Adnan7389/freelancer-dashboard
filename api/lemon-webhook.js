@@ -65,8 +65,9 @@ export default async function handler(req, res) {
     const userDoc = snapshot.docs[0];
     const userRef = userDoc.ref;
 
-    // Construct order URL for full subscription management (cancel/change plan)
-    const orderId = attrs?.order_id || attrs?.order_id?.toString();
+    // Get subscription and order IDs
+    const subscriptionId = event.data?.id; // The subscription ID from Lemon Squeezy
+    const orderId = attrs?.order_id || (attrs?.order_id ? attrs.order_id.toString() : null);
     const subscriptionUrl = orderId 
       ? `https://app.lemonsqueezy.com/my-orders/${orderId}`
       : attrs?.urls?.customer_portal; // Fallback to customer portal if no order ID
@@ -83,12 +84,18 @@ export default async function handler(req, res) {
         "subscription_plan_changed",
       ].includes(type)
     ) {
-      await userRef.update({
+      const updateData = {
         plan: "pro",
         subscriptionUrl,
         subscriptionStatus,
         renewsAt,
-      });
+        subscriptionId, // Store the subscription ID for cancellation
+        orderId,       // Store the order ID for reference
+        lastSubscriptionUpdate: admin.firestore.FieldValue.serverTimestamp()
+      };
+      
+      // Update the user document with subscription info
+      await userRef.update(updateData);
       console.log(
         `✅ [${type}] Upgraded ${userEmail} → Pro | Status: ${subscriptionStatus}, Renews: ${renewsAt}`
       );
