@@ -63,9 +63,15 @@ function Settings() {
           setInitialName(nameVal);
 
           const userData = docSnap.data();
+          console.log('User subscription data:', userData); // Debug log
+          
+          // Handle different status formats (case-insensitive)
+          const status = userData?.subscriptionStatus?.toLowerCase() || null;
           setSubscriptionUrl(userData?.subscriptionUrl || null);
-          setSubscriptionStatus(userData?.subscriptionStatus || null);
+          setSubscriptionStatus(status);
           setRenewsAt(userData?.renewsAt || null);
+          
+          console.log('Subscription status:', status); // Debug log
         }
       };
       fetchName();
@@ -167,6 +173,10 @@ function Settings() {
     setCancelling(true);
     try {
       const idToken = await currentUser.getIdToken();
+      console.log('Sending request to cancel subscription...');
+      
+      // In development, this will be http://localhost:3000/api/cancel-subscription
+      // In production, it will be /api/cancel-subscription (relative URL)
       const response = await fetch('/api/cancel-subscription', {
         method: 'POST',
         headers: {
@@ -175,18 +185,32 @@ function Settings() {
         }
       });
 
-      const result = await response.json();
-
+      console.log('Response status:', response.status);
+      
+      // Check if response is OK before trying to parse as JSON
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to cancel subscription');
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
+      // Try to parse JSON only if response is OK
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        console.error('Error parsing JSON:', jsonError);
+        throw new Error('Invalid response from server');
+      }
+
+      console.log('Subscription cancellation successful:', result);
+      
       // Update local state
       setSubscriptionStatus('cancelled');
       toast.success('Your subscription has been cancelled. You will retain access until the end of your billing period.');
     } catch (error) {
-      console.error('Error cancelling subscription:', error);
-      toast.error(error.message || 'Failed to cancel subscription');
+      console.error('Error in handleCancelSubscription:', error);
+      toast.error(error.message || 'Failed to cancel subscription. Please try again or contact support.');
     } finally {
       setCancelling(false);
     }
@@ -379,7 +403,7 @@ function Settings() {
               <FiCreditCard /> Manage Subscription
             </a>
             
-            {subscriptionStatus !== 'cancelled' && (
+            {(subscriptionStatus && !['cancelled', 'canceled'].includes(subscriptionStatus)) && (
               <button
                 onClick={handleCancelSubscription}
                 disabled={cancelling}

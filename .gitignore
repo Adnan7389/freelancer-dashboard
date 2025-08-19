@@ -1,8 +1,42 @@
+# Dependencies
 node_modules/
+.pnp
+.pnp.js
+
+# Environment variables
 .env
-*.local
+.env.*
+!.env.example
+
+# Build output
+/dist
+/.vercel
+/.next
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local development
 .DS_Store
-freelancer-dashboard-*.json
+*.local
+
+# Firebase
 .firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+# Project specific
+freelancer-dashboard-*.json
 scripts/firestore-structure.json
 scripts/sendTestWebhook.js
+
+# IDE/Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Vercel
+.vercel
