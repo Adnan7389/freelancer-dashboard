@@ -1,30 +1,21 @@
+import { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Toaster } from "react-hot-toast";
+import { useAuth } from "./hooks/useAuth";
 import Navbar from "./components/Navbar";
 import LandingNavbar from "./components/LandingNavbar";
 import Footer from "./components/Footer";
 import MinimalFooter from "./components/MinimalFooter";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Home from "./pages/Home";
-import Login from "./pages/LoginPage";
-import Signup from "./pages/SignupPage";
-import Dashboard from "./pages/Dashboard";
-import SettingsPage from "./pages/SettingsPage";
-import IncomeRecords from "./pages/IncomeRecords";
-import PlatformTrendsPage from "./pages/PlatformTrendsPage";
-import AboutPage from "./pages/AboutPage";
-import IncomeToolsPage from "./pages/IncomeToolsPage";
-import AnalyticsPage from "./pages/AnalyticsPage";
-import Legal from "./pages/Legal";
-import FAQPage from "./pages/FAQPage";
-import PricingPage from "./pages/PricingPage";
-import Success from "./pages/Success";
-import Cancel from "./pages/Cancel";
-import FeedbackPage from "./pages/FeedbackPage";
-import AdminFeedbackPage from "./pages/AdminFeedbackPage";
-import { Toaster } from "react-hot-toast";
-import { useAuth } from "./hooks/useAuth";
+import { 
+  Home, Login, Signup, Dashboard, SettingsPage, IncomeRecords, 
+  PlatformTrendsPage, AboutPage, IncomeToolsPage, AnalyticsPage, 
+  Legal, FAQPage, PricingPage, Success, Cancel, FeedbackPage, 
+  AdminFeedbackPage, LoadingSpinner 
+} from './lazy';
+import FontOptimization from './components/FontOptimization';
 
 function NavbarWrapper() {
   const location = useLocation();
@@ -61,11 +52,13 @@ function App() {
   return (
     <Router>
       <div className="w-full min-h-screen bg-gray-100">
+        <FontOptimization />
         <NavbarWrapper />
         <Toaster position="top-right" reverseOrder={false} />
         <div className="min-h-screen flex flex-col">
           <main className="flex-grow">
-            <Routes>
+            <Suspense fallback={<LoadingSpinner />}>
+              <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/legal" element={<Legal />} />
@@ -126,6 +119,7 @@ function App() {
                 } 
               />
             </Routes>
+          </Suspense>
           </main>
           <FooterWrapper />
         </div>
