@@ -1,19 +1,41 @@
-import { initializeApp, cert, getApps, getApp } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-import { getAuth } from 'firebase-admin/auth';
+import admin from 'firebase-admin';
 import axios from 'axios';
 
 // Initialize Firebase Admin if not already done
-const apps = getApps();
-const admin = apps.length ? getApp() : initializeApp({
-  credential: cert(JSON.parse(
-    Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT, 'base64').toString()
-  ))
-});
+if (!admin.apps.length) {
+  try {
+    if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
+      console.error('FIREBASE_SERVICE_ACCOUNT environment variable is not set');
+      throw new Error('Server configuration error: Missing Firebase service account');
+    }
+    
+    // Decode base64 service account
+    const serviceAccountJson = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT, 'base64').toString('utf-8');
+    const serviceAccount = JSON.parse(serviceAccountJson);
+    
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+    
+    console.log('Firebase Admin initialized successfully');
+  } catch (error) {
+    console.error('Error initializing Firebase Admin:', error);
+    throw new Error('Failed to initialize Firebase Admin: ' + error.message);
+  }
+}
 
-const db = getFirestore(admin);
+const db = admin.firestore();
+
+const auth = admin.auth();
+
 const LEMON_SQUEEZY_API_KEY = process.env.LEMON_SQUEEZY_API_KEY;
 
+if (!LEMON_SQUEEZY_API_KEY) {
+  console.error('LEMON_SQUEEZY_API_KEY is not set');
+  throw new Error('Server configuration error');
+}
+
+// Default export for the API route handler
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -27,85 +49,57 @@ export default async function handler(req, res) {
     }
 
     const idToken = authHeader.split('Bearer ')[1];
-    const decodedToken = await getAuth().verifyIdToken(idToken);
+    const decodedToken = await auth.verifyIdToken(idToken);
     const userId = decodedToken.uid;
 
     // Get user's subscription data
-    const userRef = db.collection('users').doc(userId);
-    const userDoc = await userRef.get();
-    
+    const userDoc = await db.collection('users').doc(userId).get();
     if (!userDoc.exists) {
-      console.error('User not found:', userId);
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const userData = userDoc.data();
-    const subscriptionId = userData.subscriptionId;
-
+    const subscriptionId = userDoc.data().subscriptionId;
     if (!subscriptionId) {
-      console.error('No subscription ID found for user:', userId);
-      return res.status(400).json({ 
-        error: 'No active subscription found',
-        details: 'No subscription ID found in user document' 
-      });
+      return res.status(400).json({ error: 'No active subscription found' });
     }
-    
-    console.log(`Cancelling subscription ${subscriptionId} for user ${userId}`);
 
-    try {
-      // Call Lemon Squeezy API to cancel the subscription
-      const response = await axios.patch(
-        `https://api.lemonsqueezy.com/v1/subscriptions/${subscriptionId}`,
-        {
-          data: {
-            type: 'subscriptions',
-            id: subscriptionId,
-            attributes: {
-              cancelled: true
-            }
+    // Cancel subscription via Lemon Squeezy API
+    const lemonResponse = await axios.patch(
+      `https://api.lemonsqueezy.com/v1/subscriptions/${subscriptionId}`,
+      {
+        data: {
+          type: 'subscriptions',
+          id: subscriptionId,
+          attributes: {
+            cancelled: true
           }
-        },
-        {
-          headers: {
-            'Accept': 'application/vnd.api+json',
-            'Content-Type': 'application/vnd.api+json',
-            'Authorization': `Bearer ${LEMON_SQUEEZY_API_KEY}`,
-            'Cache-Control': 'no-cache'
-          },
-          validateStatus: status => status < 500
         }
-      );
-      
-      console.log('Lemon Squeezy API response:', {
-        status: response.status,
-        data: response.data
-      });
-
-      if (response.status >= 400) {
-        throw new Error(`Lemon Squeezy API error: ${response.status} - ${JSON.stringify(response.data)}`);
+      },
+      {
+        headers: {
+          'Accept': 'application/vnd.api+json',
+          'Content-Type': 'application/vnd.api+json',
+          'Authorization': `Bearer ${LEMON_SQUEEZY_API_KEY}`
+        }
       }
+    );
 
-      // Update user's subscription status in Firestore
-      await userRef.update({
-        subscriptionStatus: 'cancelled',
-        cancelledAt: new Date().toISOString()
-      });
-
-      return res.status(200).json({ 
-        success: true, 
-        message: 'Subscription cancelled successfully' 
-      });
-      
-    } catch (apiError) {
-      console.error('Error calling Lemon Squeezy API:', apiError);
-      throw apiError;
-    }
-    
-  } catch (error) {
-    console.error('🔥 Error cancelling subscription:', error);
-    return res.status(500).json({
-      error: 'Failed to cancel subscription',
-      details: error.response?.data || error.message || 'Unknown error',
+    // Update Firestore with cancellation details
+    const endsAt = lemonResponse.data.data.attributes.ends_at;
+    await db.collection('users').doc(userId).update({
+      isSubscribed: true, // Keep access until period ends
+      subscriptionStatus: 'cancelled',
+      willCancelAtPeriodEnd: true,
+      subscriptionCancelledAt: admin.firestore.FieldValue.serverTimestamp(),
+      subscriptionEndsAt: endsAt ? new Date(endsAt).toISOString() : null,
+      lastSubscriptionUpdate: admin.firestore.FieldValue.serverTimestamp()
     });
+    
+    console.log(`Subscription cancellation processed. Access will end on: ${endsAt}`);
+
+    return res.status(200).json({ message: 'Subscription canceled successfully' });
+  } catch (error) {
+    console.error('Error in cancel-subscription handler:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }

@@ -23,6 +23,7 @@ function verifySignature(rawBody, signature, secret) {
   return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
 }
 
+// Default export for the webhook handler
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).send("Method Not Allowed");
@@ -74,7 +75,7 @@ export default async function handler(req, res) {
     const subscriptionStatus = attrs?.status_formatted || null;
     const renewsAt = attrs?.renews_at || null;
 
-    // Pro events
+    // Pro events - Active subscription
     if (
       [
         "order_created",
@@ -86,34 +87,41 @@ export default async function handler(req, res) {
     ) {
       const updateData = {
         plan: "pro",
+        isSubscribed: true,  // Explicitly set isSubscribed to true
         subscriptionUrl,
-        subscriptionStatus,
-        renewsAt,
-        subscriptionId, // Store the subscription ID for cancellation
-        orderId,       // Store the order ID for reference
+        subscriptionStatus: attrs.status || subscriptionStatus, // Use the status from attributes
+        renewsAt: renewsAt ? new Date(renewsAt) : null,
+        subscriptionId,
+        orderId,
+        willCancelAtPeriodEnd: false, // Reset cancellation flag if subscription is active
         lastSubscriptionUpdate: admin.firestore.FieldValue.serverTimestamp()
       };
       
       // Update the user document with subscription info
       await userRef.update(updateData);
-      console.log(
-        `✅ [${type}] Upgraded ${userEmail} → Pro | Status: ${subscriptionStatus}, Renews: ${renewsAt}`
-      );
+      console.log(`✅ [${type}] Upgraded ${userEmail} → Pro | Status: ${updateData.subscriptionStatus}, Renews: ${renewsAt}`);
     }
 
-    // Free events
+    // Free events - Inactive/cancelled subscription
     if (
-      ["subscription_cancelled", "subscription_expired", "subscription_payment_failed"].includes(
-        type
-      )
+      [
+        "subscription_cancelled", 
+        "subscription_expired", 
+        "subscription_payment_failed"
+      ].includes(type)
     ) {
-      await userRef.update({
+      const updateData = {
         plan: "free",
+        isSubscribed: false,  // Explicitly set isSubscribed to false
         subscriptionUrl,
-        subscriptionStatus,
+        subscriptionStatus: attrs.status || subscriptionStatus || 'cancelled',
         renewsAt: null,
-      });
-      console.log(`⚠️ [${type}] Downgraded ${userEmail} → Free`);
+        willCancelAtPeriodEnd: false,
+        subscriptionCancelledAt: admin.firestore.FieldValue.serverTimestamp()
+      };
+      
+      await userRef.update(updateData);
+      console.log(`⚠️ [${type}] Downgraded ${userEmail} → Free | Status: ${updateData.subscriptionStatus}`);
     }
 
     return res.status(200).send("Webhook handled");
