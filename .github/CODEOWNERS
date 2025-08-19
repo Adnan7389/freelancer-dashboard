@@ -1,0 +1,12 @@
+# Default owners for everything in the repo
+* @your-github-username
+
+# Specific owners for certain paths
+/.github/ @your-github-username/engineering
+/src/ @your-github-username/frontend-team
+/api/ @your-github-username/backend-team
+
+# Documentation
+/README.md @your-github-username/docs-team
+/CONTRIBUTING.md @your-github-username/docs-team
+/SECURITY.md @your-github-username/security-team

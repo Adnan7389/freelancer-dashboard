@@ -13,7 +13,7 @@ import {
   Home, Login, Signup, Dashboard, SettingsPage, IncomeRecords, 
   PlatformTrendsPage, AboutPage, IncomeToolsPage, AnalyticsPage, 
   Legal, FAQPage, PricingPage, Success, Cancel, FeedbackPage, 
-  AdminFeedbackPage, LoadingSpinner 
+  AdminFeedbackPage, LoadingSpinner, SubscriptionPage 
 } from './lazy';
 import FontOptimization from './components/FontOptimization';
 
@@ -115,6 +115,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <IncomeToolsPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/subscription" 
+                element={
+                  <ProtectedRoute>
+                    <SubscriptionPage />
                   </ProtectedRoute>
                 } 
               />

@@ -20,8 +20,10 @@ import {
   FiClock,
   FiTrash2,
   FiLoader,
-  FiCreditCard
+  FiCreditCard,
+  FiExternalLink
 } from "react-icons/fi";
+import { Link } from "react-router-dom";
 
 function Settings() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -41,9 +43,6 @@ function Settings() {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const [subscriptionUrl, setSubscriptionUrl] = useState(null);
-  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
-  const [renewsAt, setRenewsAt] = useState(null);
-  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -65,13 +64,10 @@ function Settings() {
           const userData = docSnap.data();
           console.log('User subscription data:', userData); // Debug log
           
-          // Handle different status formats (case-insensitive)
-          const status = userData?.subscriptionStatus?.toLowerCase() || null;
+          // Only keep the subscription URL for the manage subscription link
           setSubscriptionUrl(userData?.subscriptionUrl || null);
-          setSubscriptionStatus(status);
-          setRenewsAt(userData?.renewsAt || null);
           
-          console.log('Subscription status:', status); // Debug log
+          console.log('Subscription URL:', userData?.subscriptionUrl); // Debug log
         }
       };
       fetchName();
@@ -164,57 +160,6 @@ function Settings() {
   const lastLogin = new Date(
     currentUser?.metadata?.lastSignInTime || ""
   ).toLocaleString();
-
-  const handleCancelSubscription = async () => {
-    if (!window.confirm('Are you sure you want to cancel your subscription? You will retain access until the end of your billing period.')) {
-      return;
-    }
-
-    setCancelling(true);
-    try {
-      const idToken = await currentUser.getIdToken();
-      console.log('Sending request to cancel subscription...');
-      
-      // In development, this will be http://localhost:3000/api/cancel-subscription
-      // In production, it will be /api/cancel-subscription (relative URL)
-      const response = await fetch('/api/cancel-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}`
-        }
-      });
-
-      console.log('Response status:', response.status);
-      
-      // Check if response is OK before trying to parse as JSON
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      // Try to parse JSON only if response is OK
-      let result;
-      try {
-        result = await response.json();
-      } catch (jsonError) {
-        console.error('Error parsing JSON:', jsonError);
-        throw new Error('Invalid response from server');
-      }
-
-      console.log('Subscription cancellation successful:', result);
-      
-      // Update local state
-      setSubscriptionStatus('cancelled');
-      toast.success('Your subscription has been cancelled. You will retain access until the end of your billing period.');
-    } catch (error) {
-      console.error('Error in handleCancelSubscription:', error);
-      toast.error(error.message || 'Failed to cancel subscription. Please try again or contact support.');
-    } finally {
-      setCancelling(false);
-    }
-  };
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-sm border border-gray-100 mt-10 space-y-8">
@@ -375,54 +320,21 @@ function Settings() {
         )}
       </div>
          
-      {/* Manage Subscription Section */}
-      {subscriptionUrl && (
-        <div className="space-y-3 pt-4 border-t border-gray-200">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-            <FiCreditCard /> Subscription
-          </label>
-          <p className="text-sm text-gray-600">
-            Status: <strong className={subscriptionStatus === 'cancelled' ? 'text-red-600' : ''}>
-              {subscriptionStatus || "Unknown"}
-            </strong>
-            {renewsAt && subscriptionStatus !== 'cancelled' && (
-              <>
-                {" "}
-                · Next billing:{" "}
-                <strong>{new Date(renewsAt).toLocaleDateString()}</strong>
-              </>
-            )}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <a
-              href={subscriptionUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition-colors"
-            >
-              <FiCreditCard /> Manage Subscription
-            </a>
-            
-            {(subscriptionStatus && !['cancelled', 'canceled'].includes(subscriptionStatus)) && (
-              <button
-                onClick={handleCancelSubscription}
-                disabled={cancelling}
-                className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
-              >
-                {cancelling ? (
-                  <>
-                    <FiLoader className="animate-spin" /> Cancelling...
-                  </>
-                ) : (
-                  <>
-                    <FiX /> Cancel Subscription
-                  </>
-                )}
-              </button>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Subscription Management Link */}
+      <div className="space-y-3 pt-4 border-t border-gray-200">
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <FiCreditCard /> Subscription Management
+        </label>
+        <p className="text-sm text-gray-600">
+          Manage your subscription, view billing history, and update payment methods.
+        </p>
+        <Link
+          to="/subscription"
+          className="inline-flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition-colors"
+        >
+          <FiExternalLink /> Go to Subscription Management
+        </Link>
+      </div>
 
       {/* Last Login Section */}
       <div className="space-y-1">

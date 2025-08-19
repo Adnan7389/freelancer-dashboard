@@ -18,6 +18,7 @@ export const Success = lazy(() => import('./pages/Success'));
 export const Cancel = lazy(() => import('./pages/Cancel'));
 export const FeedbackPage = lazy(() => import('./pages/FeedbackPage'));
 export const AdminFeedbackPage = lazy(() => import('./pages/AdminFeedbackPage'));
+export const SubscriptionPage = lazy(() => import('./pages/Subscription/SubscriptionPage'));
 
 // Loading component
 export const LoadingSpinner = () => (
