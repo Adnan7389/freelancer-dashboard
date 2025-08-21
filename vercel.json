@@ -15,12 +15,6 @@
   ],
   "routes": [
     {
-      "src": "/api/lemon-webhook",
-      "dest": "/api/lemon-webhook",
-      "public": true,
-      "continue": true
-    },
-    {
       "src": "/api/(.*)",
       "dest": "/api/$1"
     },
