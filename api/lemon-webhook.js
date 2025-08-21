@@ -52,8 +52,23 @@ async function processWebhook(event, res) {
     const userDoc = snapshot.docs[0];
     const userRef = userDoc.ref;
 
-    // Process subscription update...
-    // [Your existing processWebhook logic here]
+    // Extract relevant data from the webhook payload
+    const { subscriptionId, planId, status, endsAt, renewsAt, trialEndsAt } = attrs;
+
+    const subscriptionData = {
+      subscriptionId: subscriptionId || userDoc.data().subscriptionId,
+      planId: planId || userDoc.data().planId,
+      subscriptionStatus: status || userDoc.data().subscriptionStatus,
+      subscriptionEndsAt: endsAt ? new Date(endsAt) : null,
+      renewsAt: renewsAt ? new Date(renewsAt) : null,
+      trialEndsAt: trialEndsAt ? new Date(trialEndsAt) : null,
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Update the user's document in Firestore
+    await userRef.update(subscriptionData);
+
+    console.log(`✅ Subscription for ${userEmail} updated successfully. Status: ${status}`);
 
     return res.status(200).json({ success: true });
   } catch (error) {
