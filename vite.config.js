@@ -61,7 +61,8 @@ export default defineConfig(({ mode }) => {
       },
     },
     define: {
-      'process.env': { ...env }
+      'process.env.NODE_ENV': JSON.stringify(env.NODE_ENV || 'development'),
+      'process.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL)
     }
   };
 });

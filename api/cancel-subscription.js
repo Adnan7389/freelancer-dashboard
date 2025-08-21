@@ -1,32 +1,5 @@
-import admin from 'firebase-admin';
+import { db, auth } from '../../lib/firebase-admin';
 import axios from 'axios';
-
-// Initialize Firebase Admin if not already done
-if (!admin.apps.length) {
-  try {
-    if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
-      console.error('FIREBASE_SERVICE_ACCOUNT environment variable is not set');
-      throw new Error('Server configuration error: Missing Firebase service account');
-    }
-    
-    // Decode base64 service account
-    const serviceAccountJson = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT, 'base64').toString('utf-8');
-    const serviceAccount = JSON.parse(serviceAccountJson);
-    
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
-    
-    console.log('Firebase Admin initialized successfully');
-  } catch (error) {
-    console.error('Error initializing Firebase Admin:', error);
-    throw new Error('Failed to initialize Firebase Admin: ' + error.message);
-  }
-}
-
-const db = admin.firestore();
-
-const auth = admin.auth();
 
 const LEMON_SQUEEZY_API_KEY = process.env.LEMON_SQUEEZY_API_KEY;
 

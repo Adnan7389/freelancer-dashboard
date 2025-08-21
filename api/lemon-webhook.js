@@ -29,8 +29,7 @@ function verifySignature(rawBody, signature, secret) {
 }
 
 // Process webhook event
-async function processWebhook(event, res) {
-  const type = event.meta?.event_name;
+async function processWebhook(event) {
   const attrs = event.data?.attributes || {};
   const userEmail = attrs.user_email;
 
@@ -52,14 +51,12 @@ async function processWebhook(event, res) {
     const userDoc = snapshot.docs[0];
     const userRef = userDoc.ref;
 
-    // Get the subscription ID from the webhook
     const subscriptionId = attrs.subscription_id;
     if (!subscriptionId) {
       console.error('❌ No subscription_id in webhook payload');
       return res.status(400).json({ error: 'Webhook payload missing subscription_id' });
     }
 
-    // Fetch the full subscription object from Lemon Squeezy
     const lemonResponse = await fetch(`https://api.lemonsqueezy.com/v1/subscriptions/${subscriptionId}`, {
       headers: {
         'Accept': 'application/vnd.api+json',
@@ -75,7 +72,6 @@ async function processWebhook(event, res) {
     const subscription = await lemonResponse.json();
     const subAttrs = subscription.data.attributes;
 
-    // Prepare the data for Firestore
     const subscriptionData = {
       subscriptionId: subscription.data.id,
       planId: subAttrs.variant_id,
@@ -86,56 +82,49 @@ async function processWebhook(event, res) {
       updatedAt: new Date().toISOString(),
     };
 
-    // Update the user's document in Firestore
     await userRef.update(subscriptionData);
 
     console.log(`✅ Subscription for ${userEmail} updated successfully. Status: ${subAttrs.status}`);
 
-    return res.status(200).json({ success: true });
+    return { status: 200, data: { success: true }};
   } catch (error) {
     console.error('🔥 Webhook processing error:', error);
-    return res.status(500).json({ error: error.message });
+    return { status: 500, data: { error: error.message }};
   }
 }
 
-// Vercel Serverless Function Handler
+// Main handler for the Vercel serverless function
 export default async function handler(req, res) {
-  // Handle preflight requests
+  // Handle OPTIONS request for CORS preflight
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-signature');
     return res.status(200).end();
   }
 
   // Only allow POST requests
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    res.setHeader('Allow', ['POST', 'OPTIONS']);
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
-    // Get raw body for signature verification
     const rawBody = await getRawBody(req);
     const signature = req.headers['x-signature'];
-    const secret = process.env.LEMONSQUEEZY_SECRET;
+    const secret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET;
 
-    // Verify webhook signature
-    if (process.env.NODE_ENV === 'production' && !verifySignature(rawBody, signature, secret)) {
+    if (!verifySignature(rawBody, signature, secret)) {
       console.error('❌ Invalid webhook signature');
       return res.status(401).json({ error: 'Invalid signature' });
     }
 
-    // Parse the event
-    const event = JSON.parse(rawBody.toString('utf8'));
-    console.log('📦 Webhook event received:', event.meta?.event_name);
+    const event = JSON.parse(rawBody.toString());
+    const result = await processWebhook(event);
+    return res.status(result.status).json(result.data);
 
-    // Process the webhook
-    return await processWebhook(event, res);
   } catch (error) {
-    console.error('❌ Webhook error:', error);
-    return res.status(400).json({ 
-      error: 'Error processing webhook',
-      details: error.message 
-    });
+    console.error('🔥 Error in webhook handler:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }
