@@ -52,23 +52,44 @@ async function processWebhook(event, res) {
     const userDoc = snapshot.docs[0];
     const userRef = userDoc.ref;
 
-    // Extract relevant data from the webhook payload
-    const { subscriptionId, planId, status, endsAt, renewsAt, trialEndsAt } = attrs;
+    // Get the subscription ID from the webhook
+    const subscriptionId = attrs.subscription_id;
+    if (!subscriptionId) {
+      console.error('❌ No subscription_id in webhook payload');
+      return res.status(400).json({ error: 'Webhook payload missing subscription_id' });
+    }
 
+    // Fetch the full subscription object from Lemon Squeezy
+    const lemonResponse = await fetch(`https://api.lemonsqueezy.com/v1/subscriptions/${subscriptionId}`, {
+      headers: {
+        'Accept': 'application/vnd.api+json',
+        'Authorization': `Bearer ${process.env.LEMON_SQUEEZY_API_KEY}`
+      }
+    });
+
+    if (!lemonResponse.ok) {
+      console.error('❌ Failed to fetch subscription from Lemon Squeezy');
+      throw new Error('Failed to fetch subscription details');
+    }
+
+    const subscription = await lemonResponse.json();
+    const subAttrs = subscription.data.attributes;
+
+    // Prepare the data for Firestore
     const subscriptionData = {
-      subscriptionId: subscriptionId || userDoc.data().subscriptionId,
-      planId: planId || userDoc.data().planId,
-      subscriptionStatus: status || userDoc.data().subscriptionStatus,
-      subscriptionEndsAt: endsAt ? new Date(endsAt) : null,
-      renewsAt: renewsAt ? new Date(renewsAt) : null,
-      trialEndsAt: trialEndsAt ? new Date(trialEndsAt) : null,
+      subscriptionId: subscription.data.id,
+      planId: subAttrs.variant_id,
+      subscriptionStatus: subAttrs.status,
+      renewsAt: subAttrs.renews_at ? new Date(subAttrs.renews_at) : null,
+      endsAt: subAttrs.ends_at ? new Date(subAttrs.ends_at) : null,
+      trialEndsAt: subAttrs.trial_ends_at ? new Date(subAttrs.trial_ends_at) : null,
       updatedAt: new Date().toISOString(),
     };
 
     // Update the user's document in Firestore
     await userRef.update(subscriptionData);
 
-    console.log(`✅ Subscription for ${userEmail} updated successfully. Status: ${status}`);
+    console.log(`✅ Subscription for ${userEmail} updated successfully. Status: ${subAttrs.status}`);
 
     return res.status(200).json({ success: true });
   } catch (error) {
