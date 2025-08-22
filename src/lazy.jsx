@@ -19,6 +19,8 @@ export const Cancel = lazy(() => import('./pages/Cancel'));
 export const FeedbackPage = lazy(() => import('./pages/FeedbackPage'));
 export const AdminFeedbackPage = lazy(() => import('./pages/AdminFeedbackPage'));
 export const SubscriptionPage = lazy(() => import('./pages/Subscription/SubscriptionPage'));
+export const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+export const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 
 // Loading component
 export const LoadingSpinner = () => (
