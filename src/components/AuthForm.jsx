@@ -180,6 +180,18 @@ function AuthForm({ mode = "login", onSubmit }) {
             </div>
           )}
 
+          {/* Forgot Password Link (Login only) */}
+          {mode === "login" && (
+            <div className="text-right">
+              <Link
+                to="/forgot-password"
+                className="text-sm font-medium text-blue-600 hover:text-blue-500 hover:underline"
+              >
+                Forgot your password?
+              </Link>
+            </div>
+          )}
+
           {/* Submit Button */}
           <button
             type="submit"
