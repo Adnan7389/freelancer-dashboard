@@ -13,7 +13,7 @@ import {
   Home, Login, Signup, Dashboard, SettingsPage, IncomeRecords, 
   PlatformTrendsPage, AboutPage, IncomeToolsPage, AnalyticsPage, 
   Legal, FAQPage, PricingPage, Success, Cancel, FeedbackPage, 
-  AdminFeedbackPage, LoadingSpinner, SubscriptionPage 
+  AdminFeedbackPage, LoadingSpinner, SubscriptionPage, ForgotPasswordPage, ResetPasswordPage 
 } from './lazy';
 import FontOptimization from './components/FontOptimization';
 
@@ -40,8 +40,8 @@ function FooterWrapper() {
     '/feedback'
   ].some(path => location.pathname.startsWith(path));
   
-  // Don't show footer on login/signup pages
-  if (['/login', '/signup'].includes(location.pathname)) {
+  // Don't show footer on auth-related pages
+  if (['/login', '/signup', '/forgot-password', '/reset-password'].includes(location.pathname)) {
     return null;
   }
   
@@ -69,6 +69,8 @@ function App() {
               <Route path="/feedback" element={<FeedbackPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route 
                 path="/admin/feedback" 
                 element={
