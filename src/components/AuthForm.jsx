@@ -16,6 +16,26 @@ function AuthForm({ mode = "login", onSubmit }) {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState("");
 
+  const getFriendlyErrorMessage = (error) => {
+    switch (error.code) {
+      case 'auth/invalid-credential':
+        return 'Invalid email or password. Please try again.';
+      case 'auth/user-not-found':
+        return 'No account found with this email. Please sign up first.';
+      case 'auth/wrong-password':
+        return 'Incorrect password. Please try again or reset your password.';
+      case 'auth/email-already-in-use':
+        return 'This email is already registered. Please log in or use a different email.';
+      case 'auth/weak-password':
+        return 'Password should be at least 6 characters.';
+      case 'auth/too-many-requests':
+        return 'Too many failed attempts. Please try again later or reset your password.';
+      case 'auth/network-request-failed':
+        return 'Network error. Please check your internet connection.';
+      default:
+        return 'An error occurred. Please try again.';
+    }
+  };
   const schema = z.object({
     name: mode === "signup"
       ? z.string().min(2, "Name must be at least 2 characters")
@@ -46,8 +66,10 @@ function AuthForm({ mode = "login", onSubmit }) {
     setServerError("");
     try {
       await onSubmit(data.email, data.password, data.name);
-    } catch (err) {
-      setServerError(err.message);
+    } catch (error) {
+      console.error('Authentication error:', error);
+      setServerError(getFriendlyErrorMessage(error));
+      setIsLoading(false);
     }
   };
 
