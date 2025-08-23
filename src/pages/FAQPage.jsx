@@ -1,7 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 const FAQPage = () => {
+  const pageTitle = 'Frequently Asked Questions - Freelancer Income Tracker';
+  const pageDescription = 'Find answers to common questions about Freelancer Income Tracker. Learn about features, pricing, security, and more to make the most of our platform.';
+  const pageUrl = 'https://trackmyincome.vercel.app/';
+  const pageImage = 'https://trackmyincome.vercel.app/images/og-faq.jpg';
   const faqs = [
     {
       question: 'What is Freelancer Analytics?',
@@ -29,12 +34,68 @@ const FAQPage = () => {
     }
   ];
 
+  // Prepare FAQ schema data
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta name="keywords" content="freelancer faq, income tracker help, freelance tools questions, support, how to use" />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:type" content="article" />
+        <meta property="og:image" content={pageImage} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={pageImage} />
+        <link rel="canonical" href={pageUrl} />
+        
+        {/* FAQPage Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify(faqSchema)}
+        </script>
+        
+        {/* BreadcrumbList Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://trackmyincome.vercel.app"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "FAQ",
+                "item": pageUrl
+              }
+            ]
+          })}
+        </script>
+      </Helmet>
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-            Frequently Asked Questions
+            Freelancer Income Tracker - Frequently Asked Questions
           </h1>
           <p className="mt-4 max-w-2xl text-xl text-gray-500 mx-auto">
             Find answers to common questions about Freelancer Analytics.
@@ -57,7 +118,7 @@ const FAQPage = () => {
         </div>
 
         <div className="mt-16 text-center">
-          <h2 className="text-xl font-medium text-gray-900">Still have questions?</h2>
+          <h2 className="text-2xl font-semibold text-gray-900">Still Have Questions About Freelancer Income Tracker?</h2>
           <p className="mt-4 text-base text-gray-500">
             Can't find the answer you're looking for? Please reach out to our support team.
           </p>
