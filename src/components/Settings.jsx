@@ -6,7 +6,7 @@ import {
   EmailAuthProvider,
   deleteUser,
 } from "firebase/auth";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
 import {
   FiUser,
@@ -147,14 +147,22 @@ function Settings() {
         currentUser.email,
         deletePassword
       );
+      
+      // Reauthenticate user
       await reauthenticateWithCredential(currentUser, credential);
+      
+      // Delete user document from Firestore
+      await deleteDoc(doc(db, "users", currentUser.uid));
+      
+      // Delete user authentication
       await deleteUser(currentUser);
-      toast.success("Account deleted successfully!");
+      
+      toast.success("Account and all associated data have been deleted successfully!");
     } catch (err) {
-      console.error(err);
-      toast.error(err.message || "Failed to delete account.");
+      console.error("Error deleting account:", err);
+      toast.error(err.message || "Failed to delete account. Please try again.");
+      setDeleteLoading(false);
     }
-    setDeleteLoading(false);
   };
 
   const lastLogin = new Date(
