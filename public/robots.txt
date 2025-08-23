@@ -1,0 +1,32 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://trackmyincome.vercel.app/sitemap.xml
+
+# Disallow admin and private pages
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /api/
+
+# Crawl-delay: 10  # Uncomment if needed to limit crawl rate
+
+# Allow all essential JS and CSS files
+Allow: /*.js$
+Allow: /*.css$
+Allow: /static/
+
+# Disallow query parameters that don't change content
+Disallow: /*?*
+Disallow: /*? 
+
+# Allow specific query parameters for search and filtering
+Allow: /*?search=*
+Allow: /*?filter=*
+
+# Block common development and staging environments
+User-agent: *
+Disallow: /staging/
+Disallow: /dev/
+Disallow: /test/
