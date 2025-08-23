@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { FiBarChart2, FiDollarSign, FiFileText, FiTrendingUp, FiArrowRight } from 'react-icons/fi';
 
 const features = [
@@ -25,13 +26,56 @@ const features = [
 ];
 
 function Home() {
+  const pageTitle = 'Freelancer Income Tracker Dashboard - Track & Grow Your Income';
+  const pageDescription = 'Powerful analytics and insights to help you track, manage, and grow your freelancing career. Get started with a 14-day free trial, no credit card required.';
+  const pageUrl = 'https://trackmyincome.vercel.app';
+  const pageImage = 'https://trackmyincome.vercel.app/images/og-home.jpg';
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta name="keywords" content="freelance income tracker, freelancer dashboard, financial management, income analytics, self-employed tools, gig economy" />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content={pageImage} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={pageImage} />
+        <link rel="canonical" href={pageUrl} />
+        
+        {/* Structured Data for Homepage */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": pageTitle,
+            "description": pageDescription,
+            "url": pageUrl,
+            "publisher": {
+              "@type": "Organization",
+              "name": "Freelancer Tracker",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://trackmyincome.vercel.app/logo.png"
+              }
+            },
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": pageUrl
+            }
+          })}
+        </script>
+      </Helmet>
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div className="text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight max-w-4xl mx-auto">
-            Take Control of Your <span className="text-blue-600">Freelance Business</span>
+            Take Control of Your <span className="text-blue-600">Freelance Income</span> with Powerful Analytics
           </h1>
           <p className="mt-6 text-xl text-gray-600 max-w-2xl mx-auto">
             Powerful analytics and insights to help you track, manage, and grow your freelancing career all in one place.
@@ -62,7 +106,7 @@ function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-              Everything You Need to Succeed
+              Freelance Income Management Made Simple
             </h2>
             <p className="mt-4 max-w-2xl text-xl text-gray-600 mx-auto">
               Powerful features designed to help you manage and grow your freelance business.
