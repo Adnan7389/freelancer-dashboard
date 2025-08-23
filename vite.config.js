@@ -2,6 +2,7 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
+import sitemap from './plugins/vite-plugin-sitemap';
 
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
@@ -12,10 +13,22 @@ export default defineConfig(({ mode }) => {
       react(),
       visualizer({
         template: 'treemap', // or sunburst
-        open: true,
+        open: false,
         gzipSize: true,
         brotliSize: true,
         filename: 'bundle-analyzer.html'
+      }),
+      sitemap({
+        baseUrl: env.VITE_APP_URL || 'https://trackmyincome.vercel.app',
+        // Additional pages can be added here
+        pages: [
+          { url: '/', changefreq: 'daily', priority: 1.0 },
+          { url: '/pricing', changefreq: 'monthly', priority: 0.8 },
+          { url: '/faq', changefreq: 'weekly', priority: 0.7 },
+          { url: '/about', changefreq: 'monthly', priority: 0.6 },
+          { url: '/login', changefreq: 'monthly', priority: 0.5 },
+          { url: '/signup', changefreq: 'monthly', priority: 0.5 },
+        ]
       })
     ],
     base: './',
