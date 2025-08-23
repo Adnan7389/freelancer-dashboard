@@ -1,117 +1,137 @@
 import { useState } from "react";
-import { sendPasswordResetEmail } from "firebase/auth";
+import { FiMail, FiArrowLeft, FiAlertCircle, FiCheck } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { auth } from "../firebase";
-import { FiMail, FiArrowLeft } from "react-icons/fi";
+import { sendPasswordResetEmail } from "firebase/auth";
 
 function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [message, setMessage] = useState({ text: "", type: "" }); // success/error
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setMessage("");
+    setMessage({ text: "", type: "" });
     
     if (!email) {
-      setError("Please enter your email address");
+      setMessage({ text: "Please enter your email address", type: "error" });
       return;
     }
 
     setIsLoading(true);
+
     try {
-      console.log("Attempting to send password reset email to:", email);
-      console.log("Auth object:", auth);
+      // Option 1: Using Firebase Client SDK (keep this as fallback)
+      await sendPasswordResetEmail(auth, email, {
+        url: 'https://trackmyincome.vercel.app/reset-password',
+        handleCodeInApp: true
+      });
       
-      // Verify the email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        throw new Error("Please enter a valid email address");
-      }
+      setMessage({
+        text: "Password reset email sent! Please check your inbox (and spam folder).",
+        type: "success"
+      });
+      setEmail("");
+    } catch (error) {
+      console.error("Error sending password reset email:", error);
       
-      // Try to send the password reset email
-      await sendPasswordResetEmail(auth, email)
-        .then(() => {
-          console.log("Password reset email sent successfully");
-          setMessage("Password reset email sent. Please check your inbox (and spam folder).");
-          setEmail("");
-        })
-        .catch((error) => {
-          console.error("Error in sendPasswordResetEmail:", error);
-          // Handle specific error cases
-          if (error.code === 'auth/user-not-found') {
-            // For security, we don't reveal if the email exists or not
-            setMessage("If an account with this email exists, a password reset link has been sent.");
-          } else if (error.code === 'auth/too-many-requests') {
-            setError("Too many attempts. Please try again later.");
-          } else {
-            throw error; // Re-throw to be caught by the catch block
+      // If Firebase SDK fails, try the REST API as fallback
+      if (error.code === "auth/too-many-requests" || error.code === "auth/network-request-failed") {
+        try {
+          const API_KEY = import.meta.env.VITE_FIREBASE_API_KEY;
+          const response = await fetch(
+            `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${API_KEY}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                requestType: 'PASSWORD_RESET',
+                email: email,
+                continueUrl: 'https://trackmyincome.vercel.app/reset-password'
+              }),
+            }
+          );
+
+          const data = await response.json();
+          
+          if (data.error) {
+            throw new Error(data.error.message || 'Failed to send reset email');
           }
+
+          setMessage({
+            text: "Password reset email sent via fallback method! Please check your inbox (and spam folder).",
+            type: "success"
+          });
+          setEmail("");
+        } catch (restError) {
+          console.error("REST API fallback failed:", restError);
+          setMessage({
+            text: `Failed to send password reset email: ${restError.message}`,
+            type: "error"
+          });
+        }
+      } else {
+        setMessage({
+          text: `Failed to send password reset email: ${error.message}`,
+          type: "error"
         });
-    } catch (err) {
-      console.error("Error in password reset process:", err);
-      setError("Failed to send password reset email. Please ensure you've entered the correct email address and try again.");
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Reset Your Password
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="max-w-md w-full space-y-6 bg-white p-8 rounded-xl shadow-md">
+        <div className="text-center">
+          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
+            <FiMail className="h-6 w-6 text-blue-600" />
+          </div>
+          <h2 className="mt-3 text-2xl font-bold text-gray-900">Reset Password</h2>
+          <p className="mt-2 text-sm text-gray-600">
             Enter your email address and we'll send you a link to reset your password.
           </p>
         </div>
 
-        {error && (
-          <div className="bg-red-50 border-l-4 border-red-400 p-4">
+        {message.text && (
+          <div className={`rounded-md p-4 ${message.type === 'error' ? 'bg-red-50' : 'bg-green-50'}`}>
             <div className="flex">
-              <div className="text-red-700">
-                <p className="text-sm">{error}</p>
+              <div className="flex-shrink-0">
+                {message.type === 'error' ? (
+                  <FiAlertCircle className="h-5 w-5 text-red-400" />
+                ) : (
+                  <FiCheck className="h-5 w-5 text-green-400" />
+                )}
+              </div>
+              <div className="ml-3">
+                <p className={`text-sm font-medium ${
+                  message.type === 'error' ? 'text-red-800' : 'text-green-800'
+                }`}>
+                  {message.text}
+                </p>
               </div>
             </div>
           </div>
         )}
 
-        {message && (
-          <div className="bg-green-50 border-l-4 border-green-400 p-4">
-            <div className="flex">
-              <div className="text-green-700">
-                <p className="text-sm">{message}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email-address" className="sr-only">
-                Email address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiMail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="email-address"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="appearance-none rounded-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
+        <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              Email address
+            </label>
+            <div className="mt-1">
+              <input 
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                placeholder="you@example.com"
+              />
             </div>
           </div>
 
@@ -119,32 +139,23 @@ function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                isLoading ? 'opacity-75 cursor-not-allowed' : ''
+              }`}
             >
-              {isLoading ? (
-                <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Sending...
-                </span>
-              ) : (
-                'Send Reset Link'
-              )}
+              {isLoading ? 'Sending...' : 'Send Reset Link'}
             </button>
           </div>
-          
-          <div className="text-center">
-            <Link
-              to="/login"
-              className="font-medium text-blue-600 hover:text-blue-500 flex items-center justify-center space-x-1"
-            >
-              <FiArrowLeft className="h-4 w-4" />
-              <span>Back to login</span>
-            </Link>
-          </div>
         </form>
+
+        <div className="text-center">
+          <Link
+            to="/login"
+            className="text-sm font-medium text-blue-600 hover:text-blue-500 flex items-center justify-center"
+          >
+            <FiArrowLeft className="mr-1" /> Back to login
+          </Link>
+        </div>
       </div>
     </div>
   );
