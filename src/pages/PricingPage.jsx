@@ -2,9 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiCheck } from 'react-icons/fi';
 import { useAuth } from '../hooks/useAuth';
+import { Helmet } from 'react-helmet-async';
 
 const PricingPage = () => {
   const { currentUser } = useAuth();
+  
+  const pageTitle = 'Freelancer Income Tracker Pricing - Simple & Transparent Plans';
+  const pageDescription = 'Choose the perfect plan for your freelance business. Start with our free plan or unlock advanced features with Pro. No hidden fees, cancel anytime.';
+  const pageUrl = 'https://trackmyincome.vercel.app/pricing';
+  const pageImage = 'https://trackmyincome.vercel.app/images/og-pricing.jpg';
   
   const features = [
     { name: 'Income Records', basic: '50 max', pro: 'Unlimited' },
@@ -16,10 +22,67 @@ const PricingPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta name="keywords" content="freelancer pricing, income tracker cost, freelance tools pricing, business expense, budget planning" />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content={pageImage} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={pageImage} />
+        <link rel="canonical" href={pageUrl} />
+        
+        {/* Structured Data for Pricing Page */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": "Freelancer Income Tracker",
+            "description": pageDescription,
+            "brand": {
+              "@type": "Brand",
+              "name": "Freelancer Tracker"
+            },
+            "offers": [
+              {
+                "@type": "Offer",
+                "name": "Basic Plan",
+                "price": "0",
+                "priceCurrency": "USD",
+                "priceSpecification": {
+                  "@type": "PriceSpecification",
+                  "price": "0",
+                  "priceCurrency": "USD"
+                },
+                "description": "Perfect for getting started with basic income tracking"
+              },
+              {
+                "@type": "Offer",
+                "name": "Pro Plan",
+                "price": "5",
+                "priceCurrency": "USD",
+                "priceSpecification": {
+                  "@type": "PriceSpecification",
+                  "price": "5",
+                  "priceCurrency": "USD",
+                  "billingIncrement": 1,
+                  "billingDuration": "P1M"
+                },
+                "description": "Advanced features for serious freelancers"
+              }
+            ]
+          })}
+        </script>
+      </Helmet>
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900">Simple, transparent pricing</h1>
-          <p className="mt-3 text-xl text-gray-500">Choose the perfect plan for your needs.</p>
+          <h1 className="text-4xl font-bold text-gray-900">Simple, Transparent Pricing for Freelancers</h1>
+          <p className="mt-3 text-xl text-gray-500">Choose the perfect plan that fits your freelance business needs. No hidden fees, cancel anytime.</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
