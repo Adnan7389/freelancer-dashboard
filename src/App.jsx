@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { HelmetProvider } from 'react-helmet-async';
 import HelmetWrapper from './components/HelmetWrapper';
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
