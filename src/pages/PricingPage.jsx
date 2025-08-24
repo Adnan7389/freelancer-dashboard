@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiCheck } from 'react-icons/fi';
 import { useAuth } from '../hooks/useAuth';
-import { Helmet } from 'react-helmet-async';
+import HelmetWrapper from '../components/HelmetWrapper';
 
 const PricingPage = () => {
   const { currentUser } = useAuth();
@@ -22,7 +22,7 @@ const PricingPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <Helmet>
+      <HelmetWrapper>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
         <meta name="keywords" content="freelancer pricing, income tracker cost, freelance tools pricing, business expense, budget planning" />
@@ -78,7 +78,7 @@ const PricingPage = () => {
             ]
           })}
         </script>
-      </Helmet>
+      </HelmetWrapper>
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900">Simple, Transparent Pricing for Freelancers</h1>

@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import { Helmet, HelmetProvider } from 'react-helmet-async';
+import HelmetWrapper from './components/HelmetWrapper';
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Toaster } from "react-hot-toast";
@@ -66,7 +66,7 @@ function App() {
       <Router>
         <div className="w-full min-h-screen bg-gray-100">
           {/* Global SEO Meta Tags */}
-          <Helmet>
+          <HelmetWrapper>
             <html lang="en" />
             <title>{defaultSeo.title}</title>
             <meta name="description" content={defaultSeo.description} />
@@ -132,7 +132,7 @@ function App() {
                 ]
               })}
             </script>
-          </Helmet>
+          </HelmetWrapper>
           
           <FontOptimization />
           <NavbarWrapper />

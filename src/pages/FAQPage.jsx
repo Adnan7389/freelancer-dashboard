@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import HelmetWrapper from '../components/HelmetWrapper';
 
 const FAQPage = () => {
   const pageTitle = 'Frequently Asked Questions - Freelancer Income Tracker';
@@ -50,7 +50,7 @@ const FAQPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Helmet>
+      <HelmetWrapper>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
         <meta name="keywords" content="freelancer faq, income tracker help, freelance tools questions, support, how to use" />
@@ -91,7 +91,7 @@ const FAQPage = () => {
             ]
           })}
         </script>
-      </Helmet>
+      </HelmetWrapper>
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">

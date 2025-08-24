@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import HelmetWrapper from '../components/HelmetWrapper';
 import { FiBarChart2, FiDollarSign, FiFileText, FiTrendingUp, FiArrowRight } from 'react-icons/fi';
 
 const features = [
@@ -33,7 +33,7 @@ function Home() {
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      <Helmet>
+      <HelmetWrapper>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
         <meta name="keywords" content="freelance income tracker, freelancer dashboard, financial management, income analytics, self-employed tools, gig economy" />
@@ -70,7 +70,7 @@ function Home() {
             }
           })}
         </script>
-      </Helmet>
+      </HelmetWrapper>
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div className="text-center">
