@@ -36,11 +36,13 @@ const calculateMonthlyGrowth = (incomes) => {
   incomes.forEach(income => {
     if (income.date) {
       const date = income.date.toDate ? income.date.toDate() : new Date(income.date);
-      const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      if (!monthlyData[monthYear]) {
-        monthlyData[monthYear] = 0;
+      if (!isNaN(date.getTime())) {
+        const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        if (!monthlyData[monthYear]) {
+          monthlyData[monthYear] = 0;
+        }
+        monthlyData[monthYear] += parseFloat(income.amount) || 0;
       }
-      monthlyData[monthYear] += parseFloat(income.amount) || 0;
     }
   });
   
@@ -57,27 +59,38 @@ const calculateMonthlyGrowth = (incomes) => {
 };
 
 const calculateSeasonalPatterns = (incomes) => {
-  const monthlyTotals = Array(12).fill(0);
-  const monthlyCounts = Array(12).fill(0);
-  
+  const monthlyDataPerYear = {};
   incomes.forEach(income => {
     if (income.date) {
       try {
         const date = income.date.toDate ? income.date.toDate() : new Date(income.date);
         if (!isNaN(date.getTime())) {
+          const year = date.getFullYear().toString();
           const month = date.getMonth();
-          monthlyTotals[month] += parseFloat(income.amount) || 0;
-          monthlyCounts[month]++;
+          const key = `${year}-${month}`;
+          if (!monthlyDataPerYear[key]) {
+            monthlyDataPerYear[key] = 0;
+          }
+          monthlyDataPerYear[key] += parseFloat(income.amount) || 0;
         }
       } catch (e) {
         console.error("Invalid date format:", e);
       }
     }
   });
-  
-  return monthlyTotals.map((total, i) => ({
+
+  const averages = Array(12).fill(0);
+  const counts = Array(12).fill(0);
+  Object.keys(monthlyDataPerYear).forEach(key => {
+    const [year, monthStr] = key.split('-');
+    const month = parseInt(monthStr);
+    averages[month] += monthlyDataPerYear[key];
+    counts[month]++;
+  });
+
+  return averages.map((total, i) => ({
     month: i,
-    average: monthlyCounts[i] > 0 ? total / monthlyCounts[i] : 0
+    average: counts[i] > 0 ? total / counts[i] : 0
   }));
 };
 
@@ -101,7 +114,8 @@ function AnalyticsPage() {
     predictions: {
       projectedEarnings: 0,
       goalProgress: 0,
-      confidence: 0
+      confidence: 0,
+      totalEarnings: 0
     }
   });
 
@@ -126,6 +140,9 @@ function AnalyticsPage() {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           let date = data.date?.toDate ? data.date.toDate() : new Date(data.date);
+          if (isNaN(date.getTime())) {
+            date = new Date(); // Fallback to current date for invalid dates
+          }
           allIncomes.push({
             ...data,
             id: doc.id,
@@ -133,8 +150,8 @@ function AnalyticsPage() {
           });
         });
         
-        const currentMonth = now.getMonth();
-        const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+        // Compute seasonal patterns on all data for historical accuracy
+        const seasonalPatterns = calculateSeasonalPatterns(allIncomes);
         
         let filterDate = null;
         if (timeframe !== 'all') {
@@ -224,23 +241,22 @@ function AnalyticsPage() {
           }))
           .sort((a, b) => b.totalEarnings - a.totalEarnings);
 
-        const currentMonthEarnings = monthlyEarnings[currentMonth] || 0;
-        const previousMonthEarnings = monthlyEarnings[prevMonth] || 0;
-        let growthRate = 0;
-        if (previousMonthEarnings > 0) {
-          growthRate = ((currentMonthEarnings - previousMonthEarnings) / previousMonthEarnings) * 100;
-        }
-
+        const growthRate = calculateMonthlyGrowth(processedIncomes);
         const platformComparison = calculatePlatformComparison(processedIncomes);
-        const monthlyGrowth = calculateMonthlyGrowth(processedIncomes);
-        const seasonalPatterns = calculateSeasonalPatterns(processedIncomes);
         
-        const last3MonthsEarnings = [
-          monthlyEarnings[(currentMonth - 2 + 12) % 12] || 0,
-          monthlyEarnings[(currentMonth - 1 + 12) % 12] || 0,
-          monthlyEarnings[currentMonth] || 0
-        ];
-        const last3MonthsAverage = last3MonthsEarnings.reduce((sum, val) => sum + val, 0) / 3;
+        const monthlyData = {};
+        processedIncomes.forEach(income => {
+          const date = income.date;
+          const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+          if (!monthlyData[monthYear]) {
+            monthlyData[monthYear] = 0;
+          }
+          monthlyData[monthYear] += income.amount;
+        });
+        const sortedMonths = Object.keys(monthlyData).sort();
+        const last3 = sortedMonths.slice(-3);
+        const last3MonthsEarnings = last3.map(m => monthlyData[m] || 0);
+        const last3MonthsAverage = last3.length > 0 ? last3MonthsEarnings.reduce((sum, val) => sum + val, 0) / last3.length : 0;
         
         let bestMonth = 'N/A';
         if (seasonalPatterns.length > 0) {
@@ -272,7 +288,8 @@ function AnalyticsPage() {
             projectedEarnings: Math.round(last3MonthsAverage * 1.1),
             goalProgress: Math.min(100, Math.round((totalEarnings / 10000) * 100)),
             confidence: Math.min(95, Math.max(70, Math.floor(processedIncomes.length / 3 * 100))),
-            bestTimeToWork: bestMonth
+            bestTimeToWork: bestMonth,
+            totalEarnings: totalEarnings
           }
         });
         
@@ -331,7 +348,7 @@ function AnalyticsPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Business Insights</h1>
-            <p className="text-gray-600">Data-driven analytics to grow your freelance business</p>
+            <p className="text-gray-600">Data-driven analytics to grow your freelance business.</p>
           </div>
           <div className="flex items-center gap-2">
             <select 
@@ -340,9 +357,9 @@ function AnalyticsPage() {
               className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700"
               disabled={isLoading}
             >
-              <option value="week">This Week</option>
-              <option value="month">This Month</option>
-              <option value="year">This Year</option>
+              <option value="week">Last 7 Days</option>
+              <option value="month">Last 30 Days</option>
+              <option value="year">Last 12 Months</option>
             </select>
           </div>
         </div>
@@ -367,6 +384,7 @@ function AnalyticsPage() {
                <FiAward className="w-5 h-5 text-yellow-500" />
                <span>Top Clients</span>
               </h3>
+              <p className="text-sm text-gray-600 mb-4">Your highest-earning clients based on total revenue. Helps identify key relationships.</p>
               <div className="space-y-2 sm:space-y-3 max-h-[300px] overflow-y-auto pr-2 -mr-2">
                 {analytics.clientPerformance.topClients.length > 0 ? (
                   analytics.clientPerformance.topClients.map((client, index) => (
@@ -393,7 +411,7 @@ function AnalyticsPage() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-gray-400 text-sm p-2">No client data available</p>
+                  <p className="text-gray-400 text-sm p-2">No client data available yet. Add more income records to see insights.</p>
                 )}
               </div>
             </div>
@@ -404,6 +422,7 @@ function AnalyticsPage() {
                   <FiUsers className="w-5 h-5 text-blue-500" />
                   <span>Client Base</span>
                 </h3>
+                <p className="text-sm text-gray-600 mb-4">Breakdown of new vs. repeat clients. High repeat rate indicates strong client retention.</p>
                 <div className="space-y-3 sm:space-y-4">
                   <div className="bg-blue-50 p-3 rounded-lg">
                     <div className="flex justify-between items-center mb-1">
@@ -413,7 +432,7 @@ function AnalyticsPage() {
                       </span>
                     </div>
                     <div className="text-xs text-gray-500 mb-2">
-                      First-time clients
+                      First-time clients in the selected period
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
                       <div 
@@ -434,7 +453,7 @@ function AnalyticsPage() {
                       </span>
                     </div>
                     <div className="text-xs text-gray-500 mb-2">
-                      Returning clients
+                      Returning clients in the selected period
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
                       <div 
@@ -453,10 +472,10 @@ function AnalyticsPage() {
                         <>
                           <span className="font-medium text-gray-800">
                             {Math.round((analytics.clientPerformance.repeatClients / (analytics.clientPerformance.newClients + analytics.clientPerformance.repeatClients)) * 100)}%
-                          </span> client retention
+                          </span> client retention rate
                         </>
                       ) : (
-                        'Track repeat business to see retention'
+                        'Add more client data to track retention'
                       )}
                     </p>
                   </div>
@@ -469,6 +488,7 @@ function AnalyticsPage() {
                   <FiTrendingUp className="w-5 h-5 text-green-500" />
                   <span>Income Trends</span>
                 </h3>
+                <p className="text-sm text-gray-600 mb-4">Key trends in your earnings. Growth rate compares the latest full month to the previous one.</p>
                 <div className="space-y-3 sm:space-y-4">
                   <div className="bg-green-50 p-3 rounded-lg">
                     <div className="flex justify-between items-center">
@@ -480,7 +500,7 @@ function AnalyticsPage() {
                             `${Math.round(analytics.incomeTrends.growthRate * 10) / 10}%` : 'N/A'}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
-                          vs. previous month
+                          Compared to previous month
                         </p>
                       </div>
                       <div className={`p-1.5 sm:p-2 rounded-full ${analytics.incomeTrends.growthRate >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
@@ -508,7 +528,7 @@ function AnalyticsPage() {
                           ))}
                       </div>
                     ) : (
-                      <p className="text-xs sm:text-sm text-gray-400 p-2">No platform data available</p>
+                      <p className="text-xs sm:text-sm text-gray-400 p-2">No platform data available yet. Specify platforms in your income records.</p>
                     )}
                   </div>
                 </div>
@@ -523,6 +543,7 @@ function AnalyticsPage() {
                   <FiPieChart className="w-5 h-5 text-purple-500" />
                   <span>Projected Earnings</span>
                 </h3>
+                <p className="text-sm text-gray-600 mb-4">Estimated earnings for the next month, based on your last 3 months' average with a 10% growth factor. Confidence increases with more data.</p>
                 <div className="space-y-2 sm:space-y-3">
                   <p className="text-2xl sm:text-3xl font-bold text-gray-800">
                     ${analytics.predictions.projectedEarnings.toLocaleString()}
@@ -532,7 +553,7 @@ function AnalyticsPage() {
                       {analytics.predictions.confidence}% confidence
                     </span>
                     <span className="text-xs sm:text-sm text-gray-600">
-                      Next 30 days
+                      For next 30 days
                     </span>
                   </div>
                 </div>
@@ -544,6 +565,7 @@ function AnalyticsPage() {
                   <FiTarget className="w-5 h-5 text-blue-500" />
                   <span>Income Goal</span>
                 </h3>
+                <p className="text-sm text-gray-600 mb-4">Progress towards a sample $10,000 goal for the selected period. Adjust goals in settings for personalization (future feature).</p>
                 <div className="space-y-3">
                   <div className="relative pt-1">
                     <div className="flex items-center justify-between mb-1">
@@ -551,7 +573,7 @@ function AnalyticsPage() {
                         {analytics.predictions.goalProgress}%
                       </span>
                       <span className="text-xs font-semibold text-gray-600">
-                        $10,000
+                        Target: $10,000
                       </span>
                     </div>
                     <div className="overflow-hidden h-2 mb-2 text-xs flex rounded bg-blue-200">
@@ -565,7 +587,7 @@ function AnalyticsPage() {
                     {analytics.predictions.goalProgress >= 100 ? (
                       '🎉 Goal achieved!'
                     ) : (
-                      `$${(10000 - analytics.predictions.projectedEarnings).toLocaleString()} to go`
+                      `$${Math.max(0, (10000 - analytics.predictions.totalEarnings)).toLocaleString()} remaining to reach goal`
                     )}
                   </p>
                 </div>
@@ -577,6 +599,7 @@ function AnalyticsPage() {
                   <FiCalendar className="w-5 h-5 text-orange-500" />
                   <span>Best Time to Work</span>
                 </h3>
+                <p className="text-sm text-gray-600 mb-4">The month with your highest average earnings historically. Use this to plan marketing or capacity.</p>
                 <div className="space-y-2 sm:space-y-3">
                   <p className="text-2xl sm:text-3xl font-bold text-gray-800">
                     {analytics.incomeTrends.seasonalPatterns.length > 0 ? (
@@ -588,8 +611,8 @@ function AnalyticsPage() {
                   </p>
                   <p className="text-xs sm:text-sm text-gray-600">
                     {analytics.incomeTrends.seasonalPatterns.length > 0 ?
-                      'Your highest earning month' :
-                      'Track more income to see patterns'}
+                      'Your highest average earning month based on historical data' :
+                      'Add more historical income to detect seasonal patterns'}
                   </p>
                 </div>
               </div>
