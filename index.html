@@ -10,6 +10,20 @@
     <meta name="theme-color" content="#4F46E5" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Freelancer Dashboard</title>
+    <script>
+      // Get theme preference from localStorage or system preference
+      const storedTheme = localStorage.getItem('theme');
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      const initialTheme = storedTheme || systemTheme;
+      
+      // Apply theme immediately to prevent FOUC
+      if (initialTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+      
+      // Store initial theme
+      localStorage.setItem('theme', initialTheme);
+    </script>
   </head>
   <body>
     <div id="root"></div>

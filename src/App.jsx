@@ -18,6 +18,7 @@ import {
   AdminFeedbackPage, LoadingSpinner, SubscriptionPage, ForgotPasswordPage, ResetPasswordPage 
 } from './lazy';
 import FontOptimization from './components/FontOptimization';
+import { ThemeProvider } from './context/ThemeContext';
 
 // Default SEO configuration
 const defaultSeo = {
@@ -64,162 +65,171 @@ function FooterWrapper() {
 function App() {
   return (
     <HelmetProvider>
-      <Router>
-        <div className="w-full min-h-screen bg-gray-100">
-          {/* Global SEO Meta Tags */}
-          <HelmetWrapper>
-            <html lang="en" />
-            <title>{defaultSeo.title}</title>
-            <meta name="description" content={defaultSeo.description} />
-            <meta name="keywords" content={defaultSeo.keywords} />
-            <meta name="robots" content="index, follow" />
-            <meta property="og:type" content="website" />
-            <meta property="og:title" content={defaultSeo.title} />
-            <meta property="og:description" content={defaultSeo.description} />
-            <meta property="og:image" content={defaultSeo.image} />
-            <meta property="og:url" content={defaultSeo.siteUrl} />
-            <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:title" content={defaultSeo.title} />
-            <meta name="twitter:description" content={defaultSeo.description} />
-            <meta name="twitter:image" content={defaultSeo.image} />
-            <meta name="twitter:creator" content={defaultSeo.twitter} />
-            <link rel="canonical" href={defaultSeo.siteUrl} />
-            
-            {/* Preconnect to external domains */}
-            <link rel="preconnect" href="https://fonts.googleapis.com" />
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-            <link rel="dns-prefetch" href="https://trackmyincome.vercel.app" />
-            
-            {/* Structured Data - Global SoftwareApplication */}
-            <script type="application/ld+json">
-              {JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "SoftwareApplication",
-                "name": "Freelancer Income Tracker Dashboard",
-                "operatingSystem": "Web, iOS, Android",
-                "applicationCategory": "BusinessApplication",
-                "offers": {
-                  "@type": "Offer",
-                  "price": "0",
-                  "priceCurrency": "USD"
-                },
-                "aggregateRating": {
-                  "@type": "AggregateRating",
-                  "ratingValue": "4.8",
-                  "ratingCount": "1247"
-                },
-                "description": "Track and analyze your freelance income across multiple platforms with powerful analytics and insights."
-              })}
-            </script>
-            
-            {/* BreadcrumbList Schema */}
-            <script type="application/ld+json">
-              {JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                  {
-                    "@type": "ListItem",
-                    "position": 1,
-                    "name": "Home",
-                    "item": defaultSeo.siteUrl
+      {/* Wrap the entire app with ThemeProvider */}
+      <ThemeProvider>
+        <Router>
+          <div className="w-full min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-200">
+            {/* Global SEO Meta Tags */}
+            <HelmetWrapper>
+              <html lang="en" />
+              <title>{defaultSeo.title}</title>
+              <meta name="description" content={defaultSeo.description} />
+              <meta name="keywords" content={defaultSeo.keywords} />
+              <meta name="robots" content="index, follow" />
+              <meta property="og:type" content="website" />
+              <meta property="og:title" content={defaultSeo.title} />
+              <meta property="og:description" content={defaultSeo.description} />
+              <meta property="og:image" content={defaultSeo.image} />
+              <meta property="og:url" content={defaultSeo.siteUrl} />
+              <meta name="twitter:card" content="summary_large_image" />
+              <meta name="twitter:title" content={defaultSeo.title} />
+              <meta name="twitter:description" content={defaultSeo.description} />
+              <meta name="twitter:image" content={defaultSeo.image} />
+              <meta name="twitter:creator" content={defaultSeo.twitter} />
+              <link rel="canonical" href={defaultSeo.siteUrl} />
+              
+              {/* Preconnect to external domains */}
+              <link rel="preconnect" href="https://fonts.googleapis.com" />
+              <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+              <link rel="dns-prefetch" href="https://trackmyincome.vercel.app" />
+              
+              {/* Structured Data - Global SoftwareApplication */}
+              <script type="application/ld+json">
+                {JSON.stringify({
+                  "@context": "https://schema.org",
+                  "@type": "SoftwareApplication",
+                  "name": "Freelancer Income Tracker Dashboard",
+                  "operatingSystem": "Web, iOS, Android",
+                  "applicationCategory": "BusinessApplication",
+                  "offers": {
+                    "@type": "Offer",
+                    "price": "0",
+                    "priceCurrency": "USD"
                   },
-                  {
-                    "@type": "ListItem",
-                    "position": 2,
-                    "name": "Dashboard",
-                    "item": `${defaultSeo.siteUrl}/dashboard`
-                  }
-                ]
-              })}
-            </script>
-          </HelmetWrapper>
-          
-          <FontOptimization />
-          <NavbarWrapper />
-          <Toaster position="top-right" reverseOrder={false} />
-          <div className="min-h-screen flex flex-col">
-            <main className="flex-grow">
-              <Suspense fallback={<LoadingSpinner />}>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/about" element={<AboutPage />} />
-                  <Route path="/legal" element={<Legal />} />
-                  <Route path="/pricing" element={<PricingPage />} />
-                  <Route path="/success" element={<Success />} />
-                  <Route path="/cancel" element={<Cancel />} />
-                  <Route path="/faq" element={<FAQPage />} />
-                  <Route path="/feedback" element={<FeedbackPage />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                  <Route path="/reset-password" element={<ResetPasswordPage />} />
-                  <Route 
-                    path="/admin/feedback" 
-                    element={
-                      <ProtectedRoute>
-                        <AdminFeedbackPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/analytics" 
-                    element={
-                      <ProtectedRoute>
-                        <AnalyticsPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route
-                    path="/dashboard"
-                    element={
-                      <ProtectedRoute>
-                        <Dashboard />
-                      </ProtectedRoute>
+                  "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": "4.8",
+                    "ratingCount": "1247"
+                  },
+                  "description": "Track and analyze your freelance income across multiple platforms with powerful analytics and insights."
+                })}
+              </script>
+              
+              {/* BreadcrumbList Schema */}
+              <script type="application/ld+json">
+                {JSON.stringify({
+                  "@context": "https://schema.org",
+                  "@type": "BreadcrumbList",
+                  "itemListElement": [
+                    {
+                      "@type": "ListItem",
+                      "position": 1,
+                      "name": "Home",
+                      "item": defaultSeo.siteUrl
+                    },
+                    {
+                      "@type": "ListItem",
+                      "position": 2,
+                      "name": "Dashboard",
+                      "item": `${defaultSeo.siteUrl}/dashboard`
                     }
-                  />
-                  <Route
-                    path="/dashboard/settings"
-                    element={
-                      <ProtectedRoute>
-                        <SettingsPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/income-records" element={<ProtectedRoute><IncomeRecords /></ProtectedRoute>} />
-                  <Route 
-                    path="/platform-trends" 
-                    element={
-                      <ProtectedRoute>
-                        <PlatformTrendsPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/income-tools" 
-                    element={
-                      <ProtectedRoute>
-                        <IncomeToolsPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/subscription" 
-                    element={
-                      <ProtectedRoute>
-                        <SubscriptionPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                </Routes>
-              </Suspense>
-            </main>
-            <FooterWrapper />
+                  ]
+                })}
+              </script>
+            </HelmetWrapper>
+            
+            <FontOptimization />
+            <NavbarWrapper />
+            <Toaster 
+              position="top-right" 
+              reverseOrder={false}
+              toastOptions={{
+                className: 'dark:bg-gray-800 dark:text-white',
+              }}
+            />
+            <div className="min-h-screen flex flex-col">
+              <main className="flex-grow">
+                <Suspense fallback={<LoadingSpinner />}>
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/legal" element={<Legal />} />
+                    <Route path="/pricing" element={<PricingPage />} />
+                    <Route path="/success" element={<Success />} />
+                    <Route path="/cancel" element={<Cancel />} />
+                    <Route path="/faq" element={<FAQPage />} />
+                    <Route path="/feedback" element={<FeedbackPage />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
+                    <Route 
+                      path="/admin/feedback" 
+                      element={
+                        <ProtectedRoute>
+                          <AdminFeedbackPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/analytics" 
+                      element={
+                        <ProtectedRoute>
+                          <AnalyticsPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route
+                      path="/dashboard"
+                      element={
+                        <ProtectedRoute>
+                          <Dashboard />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/dashboard/settings"
+                      element={
+                        <ProtectedRoute>
+                          <SettingsPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route path="/income-records" element={<ProtectedRoute><IncomeRecords /></ProtectedRoute>} />
+                    <Route 
+                      path="/platform-trends" 
+                      element={
+                        <ProtectedRoute>
+                          <PlatformTrendsPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/income-tools" 
+                      element={
+                        <ProtectedRoute>
+                          <IncomeToolsPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/subscription" 
+                      element={
+                        <ProtectedRoute>
+                          <SubscriptionPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                  </Routes>
+                </Suspense>
+              </main>
+              <FooterWrapper />
+            </div>
           </div>
-        </div>
-        <Analytics />
-        <SpeedInsights />
-      </Router>
+          <Analytics />
+          <SpeedInsights />
+        </Router>
+      </ThemeProvider>
     </HelmetProvider>
   );
 }

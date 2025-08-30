@@ -1,7 +1,10 @@
+/* index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Remove or comment out these sections: */
+/*
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -33,7 +36,6 @@ body {
   min-height: 100vh;
   width: 100%;
 }
-
 
 h1 {
   font-size: 3.2em;
@@ -71,3 +73,4 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+*/
