@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import HelmetWrapper from '../components/HelmetWrapper';
+import { useTheme } from '../hooks/useTheme';
 
 const FAQPage = () => {
+  const { theme } = useTheme();
   const pageTitle = 'Frequently Asked Questions - Freelancer Income Tracker';
   const pageDescription = 'Find answers to common questions about Freelancer Income Tracker. Learn about features, pricing, security, and more to make the most of our platform.';
   const pageUrl = 'https://trackmyincome.vercel.app/';
@@ -49,7 +51,7 @@ const FAQPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <HelmetWrapper>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
@@ -94,10 +96,10 @@ const FAQPage = () => {
       </HelmetWrapper>
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+          <h1 className={`text-3xl font-extrabold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} sm:text-4xl`}>
             Freelancer Income Tracker - Frequently Asked Questions
           </h1>
-          <p className="mt-4 max-w-2xl text-xl text-gray-500 mx-auto">
+          <p className={`mt-4 max-w-2xl text-xl ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'} mx-auto`}>
             Find answers to common questions about Freelancer Analytics.
           </p>
         </div>
@@ -105,11 +107,11 @@ const FAQPage = () => {
         <div className="mt-16">
           <dl className="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-12">
             {faqs.map((faq, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
-                <dt className="text-lg font-medium text-gray-900">
+              <div key={index} className={`p-6 rounded-lg shadow-sm ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+                <dt className={`text-lg font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                   {faq.question}
                 </dt>
-                <dd className="mt-2 text-base text-gray-500">
+                <dd className={`mt-2 text-base ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
                   {faq.answer}
                 </dd>
               </div>
@@ -118,8 +120,8 @@ const FAQPage = () => {
         </div>
 
         <div className="mt-16 text-center">
-          <h2 className="text-2xl font-semibold text-gray-900">Still Have Questions About Freelancer Income Tracker?</h2>
-          <p className="mt-4 text-base text-gray-500">
+          <h2 className={`text-2xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Still Have Questions About Freelancer Income Tracker?</h2>
+          <p className={`mt-4 text-base ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
             Can't find the answer you're looking for? Please reach out to our support team.
           </p>
           <div className="mt-6">

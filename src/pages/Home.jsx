@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import HelmetWrapper from '../components/HelmetWrapper';
 import { FiBarChart2, FiDollarSign, FiFileText, FiTrendingUp, FiArrowRight } from 'react-icons/fi';
+import { useTheme } from '../hooks/useTheme';
 
 const features = [
   {
@@ -26,13 +27,14 @@ const features = [
 ];
 
 function Home() {
+  const { theme } = useTheme();
   const pageTitle = 'Freelancer Income Tracker Dashboard - Track & Grow Your Income';
   const pageDescription = 'Powerful analytics and insights to help you track, manage, and grow your freelancing career. Get started with a 14-day free trial, no credit card required.';
   const pageUrl = 'https://trackmyincome.vercel.app';
   const pageImage = 'https://trackmyincome.vercel.app/images/og-home.jpg';
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gradient-to-b from-gray-900 to-gray-800' : 'bg-gradient-to-b from-blue-50 to-white'}`}>
       <HelmetWrapper>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
@@ -74,10 +76,10 @@ function Home() {
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div className="text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight max-w-4xl mx-auto">
+          <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} leading-tight max-w-4xl mx-auto`}>
             Take Control of Your <span className="text-blue-600">Freelance Income</span> with Powerful Analytics
           </h1>
-          <p className="mt-6 text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className={`mt-6 text-xl ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
             Powerful analytics and insights to help you track, manage, and grow your freelancing career all in one place.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
@@ -90,25 +92,25 @@ function Home() {
             </Link>
             <Link 
               to="/demo" 
-              className="inline-flex items-center justify-center px-8 py-3 border border-gray-300 text-base font-medium rounded-lg text-blue-700 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10 transition-colors"
+              className={`inline-flex items-center justify-center px-8 py-3 border ${theme === 'dark' ? 'border-gray-600 text-white bg-gray-800 hover:bg-gray-700' : 'border-gray-300 text-blue-700 bg-white hover:bg-gray-50'} text-base font-medium rounded-lg md:py-4 md:text-lg md:px-10 transition-colors`}
             >
               Watch Demo
             </Link>
           </div>
-          <div className="mt-8 text-sm text-gray-500">
+          <div className={`mt-8 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
             No credit card required • 14-day free trial • Cancel anytime
           </div>
         </div>
       </section>
 
       {/* Features Grid */}
-      <section id="features" className="bg-white py-16 sm:py-24 scroll-mt-16">
+      <section id="features" className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} py-16 sm:py-24 scroll-mt-16`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+            <h2 className={`text-3xl font-extrabold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} sm:text-4xl`}>
               Freelance Income Management Made Simple
             </h2>
-            <p className="mt-4 max-w-2xl text-xl text-gray-600 mx-auto">
+            <p className={`mt-4 max-w-2xl text-xl ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} mx-auto`}>
               Powerful features designed to help you manage and grow your freelance business.
             </p>
           </div>
@@ -117,15 +119,15 @@ function Home() {
             {features.map((feature, index) => (
               <div 
                 key={index}
-                className="pt-8 pb-10 px-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100"
+                className={`pt-8 pb-10 px-6 ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-100'} rounded-xl shadow-sm hover:shadow-md transition-shadow border`}
               >
-                <div className="w-14 h-14 bg-blue-50 rounded-lg flex items-center justify-center mb-6">
+                <div className={`w-14 h-14 ${theme === 'dark' ? 'bg-blue-900/30' : 'bg-blue-50'} rounded-lg flex items-center justify-center mb-6`}>
                   {feature.icon}
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-2`}>
                   {feature.title}
                 </h3>
-                <p className="text-gray-600">
+                <p className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
                   {feature.description}
                 </p>
               </div>
@@ -155,12 +157,12 @@ function Home() {
       </section>
 
       {/* About Section - Just before footer */}
-      <section id="about" className="bg-gray-50 py-16 scroll-mt-16">
+      <section id="about" className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} py-16 scroll-mt-16`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+          <h2 className={`text-3xl font-extrabold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} sm:text-4xl`}>
             About This Project
           </h2>
-          <p className="mt-4 max-w-2xl text-xl text-gray-600 mx-auto">
+          <p className={`mt-4 max-w-2xl text-xl ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} mx-auto`}>
             A passion project built to help freelancers track, analyze, and grow their business.
             Focus on your work while we handle the numbers.
           </p>
