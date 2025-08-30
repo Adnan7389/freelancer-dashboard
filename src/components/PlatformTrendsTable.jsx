@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../hooks/useTheme'; // Import useTheme hook
 import { format, subMonths, parseISO } from 'date-fns';
 import {
   Table,
@@ -26,6 +27,7 @@ const MONTHS_TO_SHOW = 4; // For compact view - shows last 4 months
 
 function PlatformTrendsTable({ compact = true }) {
   const { currentUser } = useAuth();
+  const { theme } = useTheme(); // Get the current theme
   const navigate = useNavigate();
   const [incomes, setIncomes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -196,9 +198,18 @@ function PlatformTrendsTable({ compact = true }) {
   }
   
   return (
-    <Paper elevation={2} sx={{ p: 2, mb: 4 }}>
+    <Paper 
+      elevation={2} 
+      sx={{ 
+        p: 2, 
+        mb: 4, 
+        backgroundColor: theme === 'dark' ? '#1F2937' : '#FFF',
+        color: theme === 'dark' ? '#E5E7EB' : '#000',
+        transition: 'background-color 0.2s, color 0.2s'
+      }}
+    >
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h6" component="h2">
+        <Typography variant="h6" component="h2" sx={{ color: theme === 'dark' ? '#E5E7EB' : '#000' }}>
           <FiTrendingUp style={{ verticalAlign: 'middle', marginRight: 8 }} />
           Platform Trends
         </Typography>
@@ -207,7 +218,11 @@ function PlatformTrendsTable({ compact = true }) {
             component="button" 
             variant="body2"
             onClick={handleViewFullReport}
-            sx={{ display: 'flex', alignItems: 'center' }}
+            sx={{ 
+              display: 'flex', 
+              alignItems: 'center',
+              color: theme === 'dark' ? '#3B82F6' : '#1976d2'
+            }}
           >
             View Full Report <FiExternalLink style={{ marginLeft: 4 }} />
           </Link>
@@ -218,11 +233,11 @@ function PlatformTrendsTable({ compact = true }) {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>Month</TableCell>
+              <TableCell sx={{ color: theme === 'dark' ? '#E5E7EB' : '#000' }}>Month</TableCell>
               {platforms.map((platformKey) => {
                 const displayName = platformDisplayNames[platformKey] || platformKey;
                 return (
-                  <TableCell key={platformKey} align="center">
+                  <TableCell key={platformKey} align="center" sx={{ color: theme === 'dark' ? '#E5E7EB' : '#000' }}>
                     <Tooltip title={displayName}>
                       <Chip 
                         label={displayName.length > 10 ? `${displayName.substring(0, 8)}...` : displayName}
@@ -231,28 +246,33 @@ function PlatformTrendsTable({ compact = true }) {
                           bgcolor: `${platformColors[platformKey]}22`, 
                           border: `1px solid ${platformColors[platformKey]}`,
                           maxWidth: 100,
-                          textTransform: 'capitalize'
+                          textTransform: 'capitalize',
+                          color: theme === 'dark' ? '#E5E7EB' : '#000'
                         }}
                       />
                     </Tooltip>
                   </TableCell>
                 );
               })}
-              <TableCell align="right">Total</TableCell>
+              <TableCell align="right" sx={{ color: theme === 'dark' ? '#E5E7EB' : '#000' }}>Total</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {rows.map((row, index) => (
-              <TableRow key={index} hover>
-                <TableCell component="th" scope="row">
+              <TableRow key={index} hover sx={{ 
+                '&:hover': { 
+                  backgroundColor: theme === 'dark' ? '#374151' : 'rgba(0, 0, 0, 0.04)' 
+                } 
+              }}>
+                <TableCell component="th" scope="row" sx={{ color: theme === 'dark' ? '#E5E7EB' : '#000' }}>
                   {row.month}
                 </TableCell>
                 {platforms.map(platform => (
-                  <TableCell key={platform} align="right">
+                  <TableCell key={platform} align="right" sx={{ color: theme === 'dark' ? '#E5E7EB' : '#000' }}>
                     {formatCurrency(row.platforms[platform] || 0)}
                   </TableCell>
                 ))}
-                <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                <TableCell align="right" sx={{ fontWeight: 'bold', color: theme === 'dark' ? '#E5E7EB' : '#000' }}>
                   ${row.total.toLocaleString()}
                 </TableCell>
               </TableRow>
