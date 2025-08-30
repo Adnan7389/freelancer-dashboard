@@ -11,10 +11,12 @@ import {
   FiEyeOff,
   FiLoader 
 } from "react-icons/fi";
+import { useTheme } from "../hooks/useTheme"; // Import useTheme hook
 
 function AuthForm({ mode = "login", onSubmit }) {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState("");
+  const { theme } = useTheme(); // Get current theme
 
   const getFriendlyErrorMessage = (error) => {
     switch (error.code) {
@@ -69,18 +71,17 @@ function AuthForm({ mode = "login", onSubmit }) {
     } catch (error) {
       console.error('Authentication error:', error);
       setServerError(getFriendlyErrorMessage(error));
-      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100 p-4">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 transition-colors duration-200">
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg w-full max-w-md border border-gray-100 dark:border-gray-700 transition-colors duration-200">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">
+          <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
             {mode === "signup" ? "Create Account" : "Welcome Back"}
           </h2>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             {mode === "signup" 
               ? "Get started with your freelancer journey" 
               : "Log in to your dashboard"}
@@ -88,7 +89,7 @@ function AuthForm({ mode = "login", onSubmit }) {
         </div>
 
         {serverError && (
-          <div className="mb-6 p-3 bg-red-50 text-red-600 rounded-lg text-center border border-red-100">
+          <div className="mb-6 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-center border border-red-100 dark:border-red-800">
             {serverError}
           </div>
         )}
@@ -97,7 +98,7 @@ function AuthForm({ mode = "login", onSubmit }) {
           {/* Name Field (Signup only) */}
           {mode === "signup" && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Full Name
               </label>
               <div className="relative">
@@ -108,20 +109,20 @@ function AuthForm({ mode = "login", onSubmit }) {
                   type="text"
                   {...register("name")}
                   className={`w-full pl-10 pr-3 py-2.5 rounded-lg border ${
-                    errors.name ? "border-red-300" : "border-gray-300"
-                  } focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                    errors.name ? "border-red-300" : "border-gray-300 dark:border-gray-600"
+                  } focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
                   placeholder="John Doe"
                 />
               </div>
               {errors.name && (
-                <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name.message}</p>
               )}
             </div>
           )}
 
           {/* Email Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Email Address
             </label>
             <div className="relative">
@@ -132,19 +133,19 @@ function AuthForm({ mode = "login", onSubmit }) {
                 type="email"
                 {...register("email")}
                 className={`w-full pl-10 pr-3 py-2.5 rounded-lg border ${
-                  errors.email ? "border-red-300" : "border-gray-300"
-                } focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                  errors.email ? "border-red-300" : "border-gray-300 dark:border-gray-600"
+                } focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
                 placeholder="you@example.com"
               />
             </div>
             {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
             )}
           </div>
 
           {/* Password Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Password
             </label>
             <div className="relative">
@@ -155,8 +156,8 @@ function AuthForm({ mode = "login", onSubmit }) {
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
                 className={`w-full pl-10 pr-10 py-2.5 rounded-lg border ${
-                  errors.password ? "border-red-300" : "border-gray-300"
-                } focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                  errors.password ? "border-red-300" : "border-gray-300 dark:border-gray-600"
+                } focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
                 placeholder="••••••••"
               />
               <button
@@ -166,21 +167,21 @@ function AuthForm({ mode = "login", onSubmit }) {
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
-                  <FiEyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  <FiEyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
                 ) : (
-                  <FiEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  <FiEye className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
                 )}
               </button>
             </div>
             {errors.password && (
-              <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password.message}</p>
             )}
           </div>
 
           {/* Confirm Password Field (Signup only) */}
           {mode === "signup" && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Confirm Password
               </label>
               <div className="relative">
@@ -191,13 +192,13 @@ function AuthForm({ mode = "login", onSubmit }) {
                   type={showPassword ? "text" : "password"}
                   {...register("confirmPassword")}
                   className={`w-full pl-10 pr-3 py-2.5 rounded-lg border ${
-                    errors.confirmPassword ? "border-red-300" : "border-gray-300"
-                  } focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                    errors.confirmPassword ? "border-red-300" : "border-gray-300 dark:border-gray-600"
+                  } focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
                   placeholder="••••••••"
                 />
               </div>
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword.message}</p>
               )}
             </div>
           )}
@@ -207,7 +208,7 @@ function AuthForm({ mode = "login", onSubmit }) {
             <div className="text-right">
               <Link
                 to="/forgot-password"
-                className="text-sm font-medium text-blue-600 hover:text-blue-500 hover:underline"
+                className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 hover:underline"
               >
                 Forgot your password?
               </Link>
@@ -237,13 +238,13 @@ function AuthForm({ mode = "login", onSubmit }) {
           </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-gray-600">
+        <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
           {mode === "signup" ? (
             <>
               Already have an account?{" "}
               <Link
                 to="/login"
-                className="font-medium text-blue-600 hover:text-blue-500 hover:underline"
+                className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 hover:underline"
               >
                 Log in here
               </Link>
@@ -253,7 +254,7 @@ function AuthForm({ mode = "login", onSubmit }) {
               Don't have an account?{" "}
               <Link
                 to="/signup"
-                className="font-medium text-blue-600 hover:text-blue-500 hover:underline"
+                className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 hover:underline"
               >
                 Sign up now
               </Link>

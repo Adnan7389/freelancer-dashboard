@@ -6,6 +6,7 @@ import { db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
 import toast, { Toaster } from "react-hot-toast";
 import { useProStatus } from "../hooks/useProStatus";
+import { useTheme } from "../hooks/useTheme"; // Import useTheme hook
 
 // Validation schema
 const incomeSchema = z.object({
@@ -27,6 +28,7 @@ const incomeSchema = z.object({
 function IncomeForm() {
   const { currentUser } = useAuth();
   const isPro = useProStatus();
+  const { theme } = useTheme(); // Get current theme
 
   const {
     register,
@@ -43,7 +45,7 @@ function IncomeForm() {
   const onSubmit = async (data) => {
     try {
       const q = query(
-        collection(db, "incomes"),
+        collection(db, "incomes"), 
         where("userId", "==", currentUser.uid)
       );
 
@@ -94,18 +96,18 @@ function IncomeForm() {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md transition-colors duration-200">
       <Toaster position="top-center" />
-      <h3 className="text-lg font-bold mb-4">Add Income</h3>
+      <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Add Income</h3>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         {/* Amount */}
         <div className="mb-4">
-          <label className="block text-gray-700">Amount ($)</label>
+          <label className="block text-gray-700 dark:text-gray-300">Amount ($)</label>
           <input
             type="number"
             step="0.01"
             {...register("amount", { valueAsNumber: true })}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
           />
           {errors.amount && (
             <p className="text-red-500 text-sm">{errors.amount.message}</p>
@@ -114,11 +116,11 @@ function IncomeForm() {
 
         {/* Platform */}
         <div className="mb-4">
-           <label className="block text-gray-700">Platform</label>
+           <label className="block text-gray-700 dark:text-gray-300">Platform</label>
            <input
              type="text"
              {...register("platform")}
-             className="w-full p-2 border rounded"
+             className="w-full p-2 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
              placeholder="e.g., Fiverr, Upwork, Client Direct"
            />
            {errors.platform && (
@@ -128,11 +130,11 @@ function IncomeForm() {
 
         {/* Date */}
         <div className="mb-4">
-          <label className="block text-gray-700">Date</label>
+          <label className="block text-gray-700 dark:text-gray-300">Date</label>
           <input
             type="date"
             {...register("date")}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
           />
           {errors.date && (
             <p className="text-red-500 text-sm">{errors.date.message}</p>
@@ -141,20 +143,20 @@ function IncomeForm() {
 
         {/* Client Name */}
         <div className="mb-4">
-          <label className="block text-gray-700">Client Name (Optional)</label>
+          <label className="block text-gray-700 dark:text-gray-300">Client Name (Optional)</label>
           <input
             type="text"
             {...register("client")}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
           />
         </div>
 
         {/* Description */}
         <div className="mb-4">
-          <label className="block text-gray-700">Description (Optional)</label>
+          <label className="block text-gray-700 dark:text-gray-300">Description (Optional)</label>
           <textarea
             {...register("description")}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
             rows="3"
           />
         </div>
