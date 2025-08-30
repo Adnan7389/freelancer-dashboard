@@ -7,8 +7,10 @@ import { useAuth } from "../hooks/useAuth";
 import { collection, getDocs, query, where, limit } from "firebase/firestore";
 import { db } from "../firebase";
 import dayjs from "dayjs";
+import { useTheme } from "../hooks/useTheme";
 
 function IncomeDataTools() {
+  const { theme } = useTheme();
   const { currentUser } = useAuth();
   const isPro = useProStatus();
   const [loading, setLoading] = useState(false);
@@ -168,16 +170,16 @@ function IncomeDataTools() {
   if (!isPro) return null;
 
   return (
-    <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md border border-gray-100 space-y-6 max-w-4xl mx-auto">
+    <div className={`p-4 sm:p-6 rounded-xl shadow-md border ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-100'} space-y-6 max-w-4xl mx-auto`}>
       {/* Header Section */}
       <div className="space-y-2">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 rounded-lg">
-            <FiFileText className="text-xl text-indigo-600" />
+          <div className={`p-2 ${theme === 'dark' ? 'bg-indigo-900/30' : 'bg-indigo-50'} rounded-lg`}>
+            <FiFileText className={`text-xl ${theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'}`} />
           </div>
           <div>
-            <h3 className="text-lg sm:text-xl font-bold text-gray-800">Income Data Tools</h3>
-            <p className="text-xs sm:text-sm text-gray-500">
+            <h3 className="text-lg sm:text-xl font-bold">Income Data Tools</h3>
+            <p className={`text-xs sm:text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
               Export income records by month or import from platform reports
             </p>
           </div>
@@ -186,9 +188,9 @@ function IncomeDataTools() {
 
       {/* Year Selection - Improved Mobile Visibility */}
       <div className="space-y-3">
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-          <div className="p-1.5 bg-blue-50 rounded-md">
-            <FiCalendar className="text-blue-600" />
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <div className={`p-1.5 ${theme === 'dark' ? 'bg-blue-900/30' : 'bg-blue-50'} rounded-md`}>
+            <FiCalendar className={theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} />
           </div>
           Select Year
         </label>
@@ -199,8 +201,12 @@ function IncomeDataTools() {
               onClick={() => setSelectedYear(year)}
               className={`px-3 sm:px-4 py-2 rounded-lg border transition-all duration-200 whitespace-nowrap min-w-[70px] sm:min-w-[80px] text-center text-sm sm:text-base ${
                 selectedYear === year
-                  ? 'bg-blue-100 border-blue-300 text-blue-700 font-semibold shadow-sm'
-                  : 'bg-white border-gray-200 hover:bg-gray-50 text-gray-600'
+                  ? theme === 'dark' 
+                    ? 'bg-blue-900/30 border-blue-700 text-blue-300 font-semibold shadow-sm'
+                    : 'bg-blue-100 border-blue-300 text-blue-700 font-semibold shadow-sm'
+                  : theme === 'dark'
+                    ? 'bg-gray-700 border-gray-600 hover:bg-gray-600 text-gray-300'
+                    : 'bg-white border-gray-200 hover:bg-gray-50 text-gray-600'
               }`}
               aria-label={`Select year ${year}`}
             >
@@ -213,15 +219,15 @@ function IncomeDataTools() {
       {/* Month Selection - Improved Mobile Visibility */}
       <div className="space-y-3">
         <div className="flex justify-between items-center">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-            <div className="p-1.5 bg-purple-50 rounded-md">
-              <FiFilter className="text-purple-600" />
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <div className={`p-1.5 ${theme === 'dark' ? 'bg-purple-900/30' : 'bg-purple-50'} rounded-md`}>
+              <FiFilter className={theme === 'dark' ? 'text-purple-400' : 'text-purple-600'} />
             </div>
             <span className="whitespace-nowrap">Select Months ({selectedYear})</span>
           </label>
           <button
             onClick={handleSelectAll}
-            className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1"
+            className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium flex items-center gap-1"
             aria-label={isSelectAll ? 'Deselect all months' : 'Select all months'}
           >
             {isSelectAll ? (
@@ -242,15 +248,19 @@ function IncomeDataTools() {
               disabled={loading}
               className={`flex flex-col items-center justify-center py-2 px-1 sm:px-3 rounded-lg border transition-all duration-200 min-h-[60px] ${
                 selectedMonths.includes(month.value)
-                  ? 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm'
-                  : 'bg-gray-50 border-gray-200 hover:bg-gray-100 text-gray-600'
+                  ? theme === 'dark'
+                    ? 'bg-indigo-900/30 border-indigo-700 text-indigo-300 shadow-sm'
+                    : 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm'
+                  : theme === 'dark'
+                    ? 'bg-gray-700 border-gray-600 hover:bg-gray-600 text-gray-300'
+                    : 'bg-gray-50 border-gray-200 hover:bg-gray-100 text-gray-600'
               } ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
               aria-label={`${selectedMonths.includes(month.value) ? 'Selected' : 'Select'} ${month.name}`}
             >
               <span className="text-xs font-medium sm:hidden">{month.shortName}</span>
               <span className="hidden sm:inline text-sm font-medium">{month.name}</span>
               {selectedMonths.includes(month.value) && (
-                <FiCheck className="text-indigo-600 mt-1" size={14} />
+                <FiCheck className={theme === 'dark' ? "text-indigo-400" : "text-indigo-600"} size={14} />
               )}
             </button>
           ))}
@@ -259,8 +269,8 @@ function IncomeDataTools() {
 
       {/* Record Count Preview */}
       {isLoadingCount ? (
-        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 animate-pulse">
-          <p className="text-xs sm:text-sm text-blue-700 flex items-center gap-2">
+        <div className={`p-3 rounded-lg border ${theme === 'dark' ? 'bg-blue-900/20 border-blue-700' : 'bg-blue-50 border-blue-200'} animate-pulse`}>
+          <p className={`text-xs sm:text-sm flex items-center gap-2 ${theme === 'dark' ? 'text-blue-300' : 'text-blue-700'}`}>
             <svg className="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -271,22 +281,24 @@ function IncomeDataTools() {
       ) : recordCount !== null && (
         <div className={`p-3 rounded-lg border ${
           recordCount > 0 
-            ? 'bg-blue-50 border-blue-200' 
-            : 'bg-amber-50 border-amber-200'
+            ? theme === 'dark' ? 'bg-blue-900/20 border-blue-700' : 'bg-blue-50 border-blue-200'
+            : theme === 'dark' ? 'bg-amber-900/20 border-amber-700' : 'bg-amber-50 border-amber-200'
         }`}>
           <p className={`text-xs sm:text-sm flex items-center gap-2 ${
-            recordCount > 0 ? 'text-blue-700' : 'text-amber-700'
+            recordCount > 0 
+              ? theme === 'dark' ? 'text-blue-300' : 'text-blue-700'
+              : theme === 'dark' ? 'text-amber-300' : 'text-amber-700'
           }`}>
             {recordCount > 0 ? (
               <>
-                <FiCheckCircle className="text-blue-500" />
+                <FiCheckCircle className={theme === 'dark' ? "text-blue-400" : "text-blue-500"} />
                 <span>
                   Found <span className="font-semibold">{recordCount}</span> record{recordCount !== 1 ? 's' : ''} for {selectedMonths.length} selected month{selectedMonths.length !== 1 ? 's' : ''} in {selectedYear}
                 </span>
               </>
             ) : (
               <>
-                <FiCheckCircle className="text-amber-500" />
+                <FiCheckCircle className={theme === 'dark' ? "text-amber-400" : "text-amber-500"} />
                 <span>No records found for the selected period</span>
               </>
             )}
@@ -301,7 +313,7 @@ function IncomeDataTools() {
           disabled={loading || selectedMonths.length === 0 || recordCount === 0}
           className={`flex items-center justify-center gap-2 px-4 py-2.5 sm:py-3 rounded-lg font-medium transition-all duration-200 text-sm sm:text-base ${
             loading || selectedMonths.length === 0 || recordCount === 0
-              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+              ? theme === 'dark' ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-500 cursor-not-allowed'
               : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-lg'
           }`}
           aria-label="Export selected income data"
@@ -312,7 +324,7 @@ function IncomeDataTools() {
 
         <label className={`flex items-center justify-center gap-2 px-4 py-2.5 sm:py-3 rounded-lg font-medium transition-all duration-200 cursor-pointer text-sm sm:text-base ${
           loading
-            ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+            ? theme === 'dark' ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-500 cursor-not-allowed'
             : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md hover:shadow-lg'
         }`}>
           <FiUpload size={16} />
@@ -329,7 +341,7 @@ function IncomeDataTools() {
       </div>
 
       {/* Help Text */}
-      <div className="text-xs text-gray-500 pt-2 border-t border-gray-100">
+      <div className={`text-xs pt-2 border-t ${theme === 'dark' ? 'text-gray-400 border-gray-700' : 'text-gray-500 border-gray-100'}`}>
         <p>Supported formats: CSV exports from Fiverr, Upwork, or custom spreadsheets</p>
       </div>
     </div>

@@ -5,9 +5,11 @@ import { useAuth } from "../hooks/useAuth";
 import SummaryCard from "./SummaryCard";
 import { FiDollarSign, FiTrendingUp, FiPieChart, FiLoader } from "react-icons/fi";
 import { format } from "date-fns";
+import { useTheme } from "../hooks/useTheme"; // Import useTheme hook
 
 function AnalyticsSummary() {
   const { currentUser } = useAuth();
+  const { theme } = useTheme(); // Get the current theme
   const [summary, setSummary] = useState({
     totalIncome: 0,
     averageIncome: 0,
@@ -103,9 +105,13 @@ function AnalyticsSummary() {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
         {[1, 2, 3].map((i) => (
-          <SummaryCard key={i} title="Loading..." bg="bg-gray-50">
+          <SummaryCard 
+            key={i} 
+            title="Loading..." 
+            bg="bg-gray-50 dark:bg-gray-800"
+          >
             <div className="flex justify-center py-6">
-              <FiLoader className="animate-spin text-gray-400 text-2xl" />
+              <FiLoader className="animate-spin text-gray-400 dark:text-gray-500 text-2xl" />
             </div>
           </SummaryCard>
         ))}
@@ -118,13 +124,13 @@ function AnalyticsSummary() {
       <SummaryCard 
         title="Total Income" 
         icon={<FiDollarSign className="text-blue-500" />}
-        bg="bg-blue-50"
+        bg="bg-blue-50 dark:bg-blue-900/30"
         footer={`Updated ${format(summary.lastUpdated || new Date(), 'MMM d, h:mm a')}`}
       >
-        <div className="text-3xl font-bold text-gray-800 py-2">
+        <div className="text-3xl font-bold text-gray-800 dark:text-white py-2">
           {formatCurrency(summary.totalIncome)}
         </div>
-        <div className="text-sm text-blue-600 font-medium mt-1">
+        <div className="text-sm text-blue-600 dark:text-blue-400 font-medium mt-1">
           All-time earnings
         </div>
       </SummaryCard>
@@ -132,12 +138,12 @@ function AnalyticsSummary() {
       <SummaryCard 
         title="Average Income" 
         icon={<FiTrendingUp className="text-green-500" />}
-        bg="bg-green-50"
+        bg="bg-green-50 dark:bg-green-900/30"
       >
-        <div className="text-3xl font-bold text-gray-800 py-2">
+        <div className="text-3xl font-bold text-gray-800 dark:text-white py-2">
           {formatCurrency(summary.averageIncome)}
         </div>
-        <div className="text-sm text-green-600 font-medium mt-1">
+        <div className="text-sm text-green-600 dark:text-green-400 font-medium mt-1">
           Per project/entry
         </div>
       </SummaryCard>
@@ -145,7 +151,7 @@ function AnalyticsSummary() {
       <SummaryCard 
         title="By Platform" 
         icon={<FiPieChart className="text-purple-500" />}
-        bg="bg-purple-50"
+        bg="bg-purple-50 dark:bg-purple-900/30"
       >
         <ul className="space-y-3">
           {Object.entries(summary.byPlatform).map(([platform, amount]) => {
@@ -156,18 +162,18 @@ function AnalyticsSummary() {
             return (
               <li key={platform}>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="font-medium text-gray-700">{platform}</span>
-                  <span className="font-medium text-gray-800">
+                  <span className="font-medium text-gray-700 dark:text-gray-300">{platform}</span>
+                  <span className="font-medium text-gray-800 dark:text-white">
                     {formatCurrency(amount)}
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                   <div 
-                    className="bg-purple-500 h-2 rounded-full" 
+                    className="bg-purple-500 dark:bg-purple-600 h-2 rounded-full" 
                     style={{ width: `${percent}%` }}
                   ></div>
                 </div>
-                <div className="text-right text-xs text-gray-500 mt-1">
+                <div className="text-right text-xs text-gray-500 dark:text-gray-400 mt-1">
                   {percent.toFixed(1)}%
                 </div>
               </li>
