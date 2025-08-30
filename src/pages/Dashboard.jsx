@@ -15,9 +15,11 @@ import {
   FiChevronLeft,
 } from "react-icons/fi";
 import Sidebar from "../components/Sidebar";
+import { useTheme } from "../hooks/useTheme"; // Import useTheme hook
 
 function Dashboard() {
   const { currentUser } = useAuth();
+  const { theme } = useTheme(); // Get the current theme
   const navigate = useNavigate();
   const location = useLocation();
   const [showForm, setShowForm] = useState(false);
@@ -58,11 +60,11 @@ function Dashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col lg:flex-row transition-colors duration-200">
       {/* Mobile Toggle Button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="sidebar-toggle lg:hidden fixed bottom-6 right-6 z-30 bg-blue-600 text-white p-3 rounded-full shadow-xl hover:bg-blue-700 transition-all"
+        className="sidebar-toggle lg:hidden fixed bottom-6 right-6 z-30 bg-blue-600 dark:bg-blue-700 text-white p-3 rounded-full shadow-xl hover:bg-blue-700 dark:hover:bg-blue-800 transition-all"
       >
         {sidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
       </button>
@@ -83,19 +85,19 @@ function Dashboard() {
           {showBackButton ? (
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center text-gray-600 hover:text-gray-900"
+              className="flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
             >
               <FiChevronLeft className="mr-1" size={20} />
               <span>Back</span>
             </button>
           ) : (
-            <h2 className="text-2xl font-bold text-gray-800">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
               Welcome, {currentUser?.name}
             </h2>
           )}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 text-gray-500 hover:text-gray-700"
+            className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
           >
             <FiMenu size={24} />
           </button>
@@ -103,11 +105,11 @@ function Dashboard() {
         <div className="space-y-6">
           <button
            onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+            className="flex items-center gap-2 bg-blue-600 dark:bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 transition"
           >
             <FiPlus size={18} /> Add Income
           </button>       
-          <div className="border-t border-gray-200 pt-4">
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
             <AnalyticsSummary />
           </div>
 
@@ -123,14 +125,14 @@ function Dashboard() {
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 z-40 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white w-full max-w-lg rounded-lg shadow-lg relative max-h-[95vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-40 dark:bg-opacity-60 z-40 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 w-full max-w-lg rounded-lg shadow-lg relative max-h-[95vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="sticky top-0 bg-white z-10 flex justify-between items-center p-4 border-b">
-               <h3 className="text-lg font-semibold text-gray-800">Add New Income</h3>
+            <div className="sticky top-0 bg-white dark:bg-gray-800 z-10 flex justify-between items-center p-4 border-b dark:border-gray-700">
+               <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Add New Income</h3>
               <button
                 onClick={() => setShowForm(false)}
-                 className="text-gray-500 hover:text-gray-700"
+                 className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                >
                  <FiX size={22} />
                </button>
@@ -142,10 +144,10 @@ function Dashboard() {
              </div>
       
              {/* Modal Footer */}
-             <div className="sticky bottom-0 bg-white z-10 p-4 border-t">
+             <div className="sticky bottom-0 bg-white dark:bg-gray-800 z-10 p-4 border-t dark:border-gray-700">
               <button
                 onClick={() => setShowForm(false)}
-                className="w-full text-center text-gray-600 hover:text-gray-800"
+                className="w-full text-center text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300"
               >
                 Cancel
               </button>

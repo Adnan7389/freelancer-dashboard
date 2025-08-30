@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useProStatus } from "../hooks/useProStatus";
+import { useTheme } from "../hooks/useTheme"; // Import useTheme hook
 import { db } from "../firebase";
 import { getCheckoutUrl } from "../utils/getCheckoutUrl";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
@@ -96,6 +97,7 @@ const calculateSeasonalPatterns = (incomes) => {
 
 function AnalyticsPage() {
   const { currentUser } = useAuth();
+  const { theme } = useTheme(); // Get the current theme
   const isPro = useProStatus();
   const [isLoading, setIsLoading] = useState(true);
   const [timeframe, setTimeframe] = useState('month');
@@ -307,8 +309,8 @@ function AnalyticsPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-6">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-        <h3 className="text-lg font-medium text-gray-800 mb-1">Crunching the numbers</h3>
-        <p className="text-gray-500 max-w-md">
+        <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-1">Crunching the numbers</h3>
+        <p className="text-gray-500 dark:text-gray-400 max-w-md">
           Analyzing your income data to provide valuable insights. This may take a moment...
         </p>
       </div>
@@ -318,12 +320,12 @@ function AnalyticsPage() {
   if (!isPro) {
     return (
       <div className="max-w-4xl mx-auto p-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <FiZap className="w-8 h-8 text-blue-600" />
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-8 text-center transition-colors duration-200">
+          <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+            <FiZap className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">Advanced Analytics</h2>
-          <p className="text-gray-600 mb-6 max-w-md mx-auto">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-3">Advanced Analytics</h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">
             Unlock powerful insights with Pro Analytics, including predictive earnings and client segmentation.
           </p>      
            <a
@@ -343,18 +345,18 @@ function AnalyticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6 transition-colors duration-200">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Business Insights</h1>
-            <p className="text-gray-600">Data-driven analytics to grow your freelance business.</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Business Insights</h1>
+            <p className="text-gray-600 dark:text-gray-300">Data-driven analytics to grow your freelance business.</p>
           </div>
           <div className="flex items-center gap-2">
             <select 
               value={timeframe}
               onChange={(e) => setTimeframe(e.target.value)}
-              className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700"
+              className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-gray-200"
               disabled={isLoading}
             >
               <option value="week">Last 7 Days</option>
@@ -367,10 +369,10 @@ function AnalyticsPage() {
         {isLoading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 animate-pulse">
-                <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
-                <div className="h-8 bg-gray-200 rounded w-1/2 mb-2"></div>
-                <div className="h-4 bg-gray-100 rounded w-1/3"></div>
+              <div key={i} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 animate-pulse transition-colors duration-200">
+                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-2"></div>
+                <div className="h-4 bg-gray-100 dark:bg-gray-600 rounded w-1/3"></div>
               </div>
             ))}
           </div>
@@ -379,62 +381,62 @@ function AnalyticsPage() {
         {/* Client Performance Section */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
               {/* Top Clients Card - Mobile Optimized */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
-             <h3 className="font-medium text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 transition-colors duration-200">
+             <h3 className="font-medium text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
                <FiAward className="w-5 h-5 text-yellow-500" />
                <span>Top Clients</span>
               </h3>
-              <p className="text-sm text-gray-600 mb-4">Your highest-earning clients based on total revenue. Helps identify key relationships.</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Your highest-earning clients based on total revenue. Helps identify key relationships.</p>
               <div className="space-y-2 sm:space-y-3 max-h-[300px] overflow-y-auto pr-2 -mr-2">
                 {analytics.clientPerformance.topClients.length > 0 ? (
                   analytics.clientPerformance.topClients.map((client, index) => (
                     <div 
                       key={index} 
-                      className="flex items-start justify-between gap-2 p-2 sm:p-3 hover:bg-gray-50 rounded-lg"
+                      className="flex items-start justify-between gap-2 p-2 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200"
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium text-sm sm:text-base break-words line-clamp-2">
+                        <p className="font-medium text-sm sm:text-base break-words line-clamp-2 dark:text-white">
                           {client.name}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                           {client.projectCount} project{client.projectCount !== 1 ? 's' : ''}
                         </p>
                       </div>
                       <div className="text-right min-w-[90px] sm:min-w-[110px] shrink-0">
-                        <p className="font-bold text-sm sm:text-base text-gray-800">
+                        <p className="font-bold text-sm sm:text-base text-gray-800 dark:text-white">
                           ${client.totalEarnings.toLocaleString()}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                           ${Math.round(client.avgProjectValue).toLocaleString()}/project
                         </p>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-gray-400 text-sm p-2">No client data available yet. Add more income records to see insights.</p>
+                  <p className="text-gray-400 dark:text-gray-500 text-sm p-2">No client data available yet. Add more income records to see insights.</p>
                 )}
               </div>
             </div>
 
               {/* Client Base Card */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                <h3 className="font-medium text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 transition-colors duration-200">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
                   <FiUsers className="w-5 h-5 text-blue-500" />
                   <span>Client Base</span>
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">Breakdown of new vs. repeat clients. High repeat rate indicates strong client retention.</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Breakdown of new vs. repeat clients. High repeat rate indicates strong client retention.</p>
                 <div className="space-y-3 sm:space-y-4">
-                  <div className="bg-blue-50 p-3 rounded-lg">
+                  <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg transition-colors duration-200">
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-xs sm:text-sm font-medium text-gray-700">New Clients</span>
-                      <span className="text-base sm:text-lg font-bold text-gray-800">
+                      <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">New Clients</span>
+                      <span className="text-base sm:text-lg font-bold text-gray-800 dark:text-white">
                         {analytics.clientPerformance.newClients}
                       </span>
                     </div>
-                    <div className="text-xs text-gray-500 mb-2">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                       First-time clients in the selected period
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 sm:h-2">
                       <div 
                         className="bg-blue-500 h-full rounded-full" 
                         style={{ 
@@ -445,17 +447,17 @@ function AnalyticsPage() {
                     </div>
                   </div>
                   
-                  <div className="bg-purple-50 p-3 rounded-lg">
+                  <div className="bg-purple-50 dark:bg-purple-900/30 p-3 rounded-lg transition-colors duration-200">
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-xs sm:text-sm font-medium text-gray-700">Repeat Clients</span>
-                      <span className="text-base sm:text-lg font-bold text-gray-800">
+                      <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Repeat Clients</span>
+                      <span className="text-base sm:text-lg font-bold text-gray-800 dark:text-white">
                         {analytics.clientPerformance.repeatClients}
                       </span>
                     </div>
-                    <div className="text-xs text-gray-500 mb-2">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                       Returning clients in the selected period
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 sm:h-2">
                       <div 
                         className="bg-purple-500 h-full rounded-full" 
                         style={{ 
@@ -467,10 +469,10 @@ function AnalyticsPage() {
                   </div>
                   
                   <div className="text-center pt-1">
-                    <p className="text-xs sm:text-sm text-gray-600">
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                       {analytics.clientPerformance.repeatClients > 0 ? (
                         <>
-                          <span className="font-medium text-gray-800">
+                          <span className="font-medium text-gray-800 dark:text-white">
                             {Math.round((analytics.clientPerformance.repeatClients / (analytics.clientPerformance.newClients + analytics.clientPerformance.repeatClients)) * 100)}%
                           </span> client retention rate
                         </>
@@ -483,52 +485,52 @@ function AnalyticsPage() {
               </div>
               
               {/* Income Trends Card */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                <h3 className="font-medium text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 transition-colors duration-200">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
                   <FiTrendingUp className="w-5 h-5 text-green-500" />
                   <span>Income Trends</span>
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">Key trends in your earnings. Growth rate compares the latest full month to the previous one.</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Key trends in your earnings. Growth rate compares the latest full month to the previous one.</p>
                 <div className="space-y-3 sm:space-y-4">
-                  <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="bg-green-50 dark:bg-green-900/30 p-3 rounded-lg transition-colors duration-200">
                     <div className="flex justify-between items-center">
                       <div>
-                        <p className="text-xs sm:text-sm font-medium text-gray-700">Monthly Growth</p>
-                        <p className="text-xl sm:text-2xl font-bold text-gray-800">
+                        <p className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Monthly Growth</p>
+                        <p className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
                           {analytics.incomeTrends.growthRate >= 0 ? '+' : ''}
                           {typeof analytics.incomeTrends.growthRate === 'number' ? 
                             `${Math.round(analytics.incomeTrends.growthRate * 10) / 10}%` : 'N/A'}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                           Compared to previous month
                         </p>
                       </div>
-                      <div className={`p-1.5 sm:p-2 rounded-full ${analytics.incomeTrends.growthRate >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                      <div className={`p-1.5 sm:p-2 rounded-full ${analytics.incomeTrends.growthRate >= 0 ? 'bg-green-100 dark:bg-green-800/30 text-green-600 dark:text-green-400' : 'bg-red-100 dark:bg-red-800/30 text-red-600 dark:text-red-400'}`}>
                         <FiTrendingUp className={`w-5 h-5 ${analytics.incomeTrends.growthRate < 0 ? 'transform rotate-180' : ''}`} />
                       </div>
                     </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <h4 className="text-xs sm:text-sm font-medium text-gray-700">Top Platforms</h4>
+                    <h4 className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Top Platforms</h4>
                     {Object.entries(analytics.incomeTrends.platformComparison).length > 0 ? (
                       <div className="space-y-2">
                         {Object.entries(analytics.incomeTrends.platformComparison)
                           .sort((a, b) => b[1] - a[1])
                           .slice(0, 3)
                           .map(([platform, amount], i) => (
-                            <div key={i} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
-                              <span className="text-xs sm:text-sm text-gray-600 truncate pr-2">
+                            <div key={i} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors duration-200">
+                              <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate pr-2">
                                 {platform}
                               </span>
-                              <span className="text-xs sm:text-sm font-medium text-gray-800 whitespace-nowrap">
+                              <span className="text-xs sm:text-sm font-medium text-gray-800 dark:text-white whitespace-nowrap">
                                 ${amount.toLocaleString(undefined, {maximumFractionDigits: 0})}
                               </span>
                             </div>
                           ))}
                       </div>
                     ) : (
-                      <p className="text-xs sm:text-sm text-gray-400 p-2">No platform data available yet. Specify platforms in your income records.</p>
+                      <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500 p-2">No platform data available yet. Specify platforms in your income records.</p>
                     )}
                   </div>
                 </div>
@@ -538,21 +540,21 @@ function AnalyticsPage() {
             {/* Core Metrics Section */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
               {/* Projected Earnings Card */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                <h3 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 transition-colors duration-200">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                   <FiPieChart className="w-5 h-5 text-purple-500" />
                   <span>Projected Earnings</span>
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">Estimated earnings for the next month, based on your last 3 months' average with a 10% growth factor. Confidence increases with more data.</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Estimated earnings for the next month, based on your last 3 months' average with a 10% growth factor. Confidence increases with more data.</p>
                 <div className="space-y-2 sm:space-y-3">
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-800">
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">
                     ${analytics.predictions.projectedEarnings.toLocaleString()}
                   </p>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+                    <span className="px-2 py-1 bg-green-100 dark:bg-green-800/30 text-green-700 dark:text-green-400 rounded-full text-xs">
                       {analytics.predictions.confidence}% confidence
                     </span>
-                    <span className="text-xs sm:text-sm text-gray-600">
+                    <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                       For next 30 days
                     </span>
                   </div>
@@ -560,30 +562,30 @@ function AnalyticsPage() {
               </div>
 
               {/* Income Goal Card */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                <h3 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 transition-colors duration-200">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                   <FiTarget className="w-5 h-5 text-blue-500" />
                   <span>Income Goal</span>
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">Progress towards a sample $10,000 goal for the selected period. Adjust goals in settings for personalization (future feature).</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Progress towards a sample $10,000 goal for the selected period. Adjust goals in settings for personalization (future feature).</p>
                 <div className="space-y-3">
                   <div className="relative pt-1">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-semibold text-blue-600">
+                      <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
                         {analytics.predictions.goalProgress}%
                       </span>
-                      <span className="text-xs font-semibold text-gray-600">
+                      <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">
                         Target: $10,000
                       </span>
                     </div>
-                    <div className="overflow-hidden h-2 mb-2 text-xs flex rounded bg-blue-200">
+                    <div className="overflow-hidden h-2 mb-2 text-xs flex rounded bg-blue-200 dark:bg-blue-800/30">
                       <div
                         style={{ width: `${analytics.predictions.goalProgress}%` }}
-                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"
+                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500 dark:bg-blue-600"
                       ></div>
                     </div>
                   </div>
-                  <p className="text-xs sm:text-sm text-gray-600">
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                     {analytics.predictions.goalProgress >= 100 ? (
                       '🎉 Goal achieved!'
                     ) : (
@@ -594,14 +596,14 @@ function AnalyticsPage() {
               </div>
 
               {/* Best Time to Work Card */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                <h3 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 transition-colors duration-200">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                   <FiCalendar className="w-5 h-5 text-orange-500" />
                   <span>Best Time to Work</span>
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">The month with your highest average earnings historically. Use this to plan marketing or capacity.</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">The month with your highest average earnings historically. Use this to plan marketing or capacity.</p>
                 <div className="space-y-2 sm:space-y-3">
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-800">
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">
                     {analytics.incomeTrends.seasonalPatterns.length > 0 ? (
                       new Date(0, analytics.incomeTrends.seasonalPatterns.reduce(
                         (bestMonth, current, i, arr) => 
@@ -609,7 +611,7 @@ function AnalyticsPage() {
                       ), 1).toLocaleString('default', { month: 'long' })
                     ) : 'N/A'}
                   </p>
-                  <p className="text-xs sm:text-sm text-gray-600">
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                     {analytics.incomeTrends.seasonalPatterns.length > 0 ?
                       'Your highest average earning month based on historical data' :
                       'Add more historical income to detect seasonal patterns'}
