@@ -24,8 +24,10 @@ import {
   FiExternalLink
 } from "react-icons/fi";
 import { Link } from "react-router-dom";
+import { useTheme } from "../hooks/useTheme";
 
 function Settings() {
+  const { theme } = useTheme();
   const [currentUser, setCurrentUser] = useState(null);
   const [name, setName] = useState("");
   const [initialName, setInitialName] = useState("");
@@ -170,35 +172,35 @@ function Settings() {
   ).toLocaleString();
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-sm border border-gray-100 mt-10 space-y-8">
+    <div className={`max-w-2xl mx-auto p-6 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'} rounded-xl shadow-sm border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'} mt-10 space-y-8`}>
       <div className="flex items-center gap-3 mb-6">
         <FiUser className="text-2xl text-blue-500" />
-        <h2 className="text-2xl font-bold text-gray-800">Account Settings</h2>
+        <h2 className="text-2xl font-bold">Account Settings</h2>
       </div>
 
       {/* Email Section */}
       <div className="space-y-1">
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+        <label className="flex items-center gap-2 text-sm font-medium">
           <FiMail /> Email Address
         </label>
         <input
           type="email"
           value={currentUser?.email || ""}
           readOnly
-          className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className={`w-full px-4 py-2.5 border ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
         />
       </div>
 
       {/* Name Section */}
       <div className="space-y-3">
         <div className="flex justify-between items-center">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <label className="flex items-center gap-2 text-sm font-medium">
             <FiUser /> Display Name
           </label>
           {!editingName && (
             <button
               onClick={() => setEditingName(true)}
-              className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+              className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
             >
               <FiEdit2 size={14} /> Change
             </button>
@@ -206,8 +208,8 @@ function Settings() {
         </div>
         
         {!editingName ? (
-          <div className="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
-            <p className="text-gray-800">{initialName || "Not set"}</p>
+          <div className={`px-4 py-3 ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'} rounded-lg border`}>
+            <p>{initialName || "Not set"}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -215,7 +217,7 @@ function Settings() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className={`w-full px-4 py-2.5 border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
               placeholder="Enter your name"
             />
             <div className="flex gap-2">
@@ -239,7 +241,7 @@ function Settings() {
                   setName(initialName);
                   setEditingName(false);
                 }}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg transition-colors"
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 px-4 py-2 rounded-lg transition-colors"
               >
                 <FiX /> Cancel
               </button>
@@ -251,13 +253,13 @@ function Settings() {
       {/* Password Section */}
       <div className="space-y-3">
         <div className="flex justify-between items-center">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <label className="flex items-center gap-2 text-sm font-medium">
             <FiLock /> Password
           </label>
           {!changePasswordVisible && (
             <button
               onClick={() => setChangePasswordVisible(true)}
-              className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+              className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
             >
               <FiEdit2 size={14} /> Change
             </button>
@@ -267,33 +269,33 @@ function Settings() {
         {changePasswordVisible && (
           <div className="space-y-3">
             <div className="space-y-1">
-              <label className="text-sm text-gray-600">Current Password</label>
+              <label className="text-sm text-gray-600 dark:text-gray-400">Current Password</label>
               <input
                 type="password"
                 placeholder="Enter current password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className={`w-full px-4 py-2.5 border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm text-gray-600">New Password</label>
+              <label className="text-sm text-gray-600 dark:text-gray-400">New Password</label>
               <input
                 type="password"
                 placeholder="Enter new password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className={`w-full px-4 py-2.5 border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm text-gray-600">Confirm New Password</label>
+              <label className="text-sm text-gray-600 dark:text-gray-400">Confirm New Password</label>
               <input
                 type="password"
                 placeholder="Confirm new password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className={`w-full px-4 py-2.5 border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
               />
             </div>
             <div className="flex gap-2 pt-2">
@@ -319,7 +321,7 @@ function Settings() {
                   setConfirmPassword("");
                   setChangePasswordVisible(false);
                 }}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg transition-colors"
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 px-4 py-2 rounded-lg transition-colors"
               >
                 <FiX /> Cancel
               </button>
@@ -329,11 +331,11 @@ function Settings() {
       </div>
          
       {/* Subscription Management Link */}
-      <div className="space-y-3 pt-4 border-t border-gray-200">
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+      <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <label className="flex items-center gap-2 text-sm font-medium">
           <FiCreditCard /> Subscription Management
         </label>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           Manage your subscription, view billing history, and update payment methods.
         </p>
         <Link
@@ -346,40 +348,40 @@ function Settings() {
 
       {/* Last Login Section */}
       <div className="space-y-1">
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+        <label className="flex items-center gap-2 text-sm font-medium">
           <FiClock /> Last Login
         </label>
-        <div className="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
-          <p className="text-gray-800">{lastLogin || "Never logged in"}</p>
+        <div className={`px-4 py-3 ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'} rounded-lg border`}>
+          <p>{lastLogin || "Never logged in"}</p>
         </div>
       </div>
 
       {/* Delete Account Section */}
-      <div className="space-y-3 pt-4 border-t border-gray-200">
-        <label className="flex items-center gap-2 text-sm font-medium text-red-600">
+      <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <label className="flex items-center gap-2 text-sm font-medium text-red-600 dark:text-red-400">
           <FiAlertTriangle /> Delete Account
         </label>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           This will permanently delete your account and all associated data.
         </p>
         
         {!confirmDelete ? (
           <button
             onClick={() => setConfirmDelete(true)}
-            className="flex items-center gap-2 text-sm text-red-600 hover:text-red-800 mt-2"
+            className="flex items-center gap-2 text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 mt-2"
           >
             <FiTrash2 size={14} /> Delete my account
           </button>
         ) : (
           <div className="space-y-3">
             <div className="space-y-1">
-              <label className="text-sm text-gray-600">Confirm Password</label>
+              <label className="text-sm text-gray-600 dark:text-gray-400">Confirm Password</label>
               <input
                 type="password"
                 placeholder="Enter your password to confirm"
                 value={deletePassword}
                 onChange={(e) => setDeletePassword(e.target.value)}
-                className="w-full px-4 py-2.5 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                className={`w-full px-4 py-2.5 border ${theme === 'dark' ? 'bg-gray-700 border-red-500 text-white' : 'border-red-200'} rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500`}
               />
             </div>
             <div className="flex gap-2">
@@ -400,7 +402,7 @@ function Settings() {
               </button>
               <button
                 onClick={() => setConfirmDelete(false)}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg transition-colors"
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 px-4 py-2 rounded-lg transition-colors"
               >
                 <FiX /> Cancel
               </button>
