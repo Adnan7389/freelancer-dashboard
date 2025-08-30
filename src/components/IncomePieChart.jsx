@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../hooks/useTheme"; // Import useTheme hook
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { FiPieChart, FiDollarSign, FiLoader } from "react-icons/fi";
@@ -11,6 +12,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 function IncomePieChart() {
   const { currentUser } = useAuth();
+  const { theme } = useTheme(); // Get the current theme
   const [platformData, setPlatformData] = useState(null);
   const [loading, setLoading] = useState(true);
   const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
@@ -88,9 +90,9 @@ function IncomePieChart() {
           label: "Income by Platform",
           data,
           backgroundColor: platformColors,
-          borderColor: '#fff',
+          borderColor: theme === 'dark' ? '#374151' : '#fff',
           borderWidth: 2,
-          hoverBorderColor: '#fff',
+          hoverBorderColor: theme === 'dark' ? '#4B5563' : '#fff',
           hoverOffset: 10
         }],
       });
@@ -98,7 +100,7 @@ function IncomePieChart() {
     });
 
     return unsubscribe;
-  }, [currentUser]);
+  }, [currentUser, theme]); // Add theme to dependencies
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-US', {
@@ -109,99 +111,102 @@ function IncomePieChart() {
     }).format(value);
   };
 
+  // Chart options with dark mode support
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { 
+        position: isMobile ? "bottom" : "right",
+        labels: {
+          padding: 20,
+          usePointStyle: true,
+          pointStyle: "circle",
+          font: {
+            family: "'Inter', sans-serif"
+          },
+          color: theme === 'dark' ? '#E5E7EB' : '#374151',
+          generateLabels: (chart) => {
+            const data = chart.data;
+            if (data.labels.length && data.datasets.length) {
+              return data.labels.map((label, i) => {
+                const value = data.datasets[0].data[i];
+                const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                const percentage = Math.round((value / total) * 100);
+                
+                return {
+                  text: `${label} (${percentage}%)`,
+                  fillStyle: data.datasets[0].backgroundColor[i],
+                  hidden: false,
+                  lineWidth: 0,
+                  strokeStyle: 'transparent',
+                  pointStyle: 'circle'
+                };
+              });
+            }
+            return [];
+          }
+        }
+      },
+      tooltip: {
+        displayColors: false,
+        backgroundColor: theme === 'dark' ? '#374151' : '#1F2937',
+        titleColor: theme === 'dark' ? '#E5E7EB' : '#F9FAFB',
+        bodyColor: theme === 'dark' ? '#E5E7EB' : '#F9FAFB',
+        titleFont: {
+          size: 14,
+          weight: 'bold'
+        },
+        bodyFont: {
+          size: 13
+        },
+        callbacks: {
+          label: function(context) {
+            const label = context.label || '';
+            const value = context.raw;
+            const total = context.chart._metasets[0].total;
+            const percent = ((value / total) * 100).toFixed(1);
+            return `${label}: ${formatCurrency(value)} (${percent}%)`;
+          },
+          title: function() {
+            return ''; // Remove title
+          }
+        }
+      },
+    },
+    cutout: isMobile ? '50%' : '60%',
+    animation: {
+      animateScale: true,
+      animateRotate: true
+    }
+  };
+
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors duration-200">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <FiPieChart className="text-2xl text-blue-500" />
-          <h3 className="text-xl font-bold text-gray-800">Income Distribution</h3>
+          <h3 className="text-xl font-bold text-gray-800 dark:text-white">Income Distribution</h3>
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <FiDollarSign className="text-gray-400" />
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+          <FiDollarSign className="text-gray-400 dark:text-gray-500" />
           <span>By Platform</span>
         </div>
       </div>
       
       {loading ? (
         <div className="h-64 md:h-80 flex items-center justify-center">
-          <FiLoader className="animate-spin text-gray-400 text-2xl" />
+          <FiLoader className="animate-spin text-gray-400 dark:text-gray-500 text-2xl" />
         </div>
       ) : !platformData ? (
         <div className="h-64 md:h-80 flex flex-col items-center justify-center text-center">
-          <FiDollarSign className="text-4xl text-gray-300 mb-3" />
-          <p className="text-gray-500">No income data available</p>
-          <p className="text-sm text-gray-400 mt-1">Add income records to see platform distribution</p>
+          <FiDollarSign className="text-4xl text-gray-300 dark:text-gray-600 mb-3" />
+          <p className="text-gray-500 dark:text-gray-400">No income data available</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Add income records to see platform distribution</p>
         </div>
       ) : (
         <div className="h-64 md:h-80">
-          <Pie
-            data={platformData}
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: { 
-                  position: isMobile ? "bottom" : "right",
-                  labels: {
-                    padding: 20,
-                    usePointStyle: true,
-                    pointStyle: "circle",
-                    font: {
-                      family: "'Inter', sans-serif"
-                    },
-                    generateLabels: (chart) => {
-                      const data = chart.data;
-                      if (data.labels.length && data.datasets.length) {
-                        return data.labels.map((label, i) => {
-                          const value = data.datasets[0].data[i];
-                          const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
-                          const percentage = Math.round((value / total) * 100);
-                          
-                          return {
-                            text: `${label} (${percentage}%)`,
-                            fillStyle: data.datasets[0].backgroundColor[i],
-                            hidden: false,
-                            lineWidth: 0,
-                            strokeStyle: 'transparent',
-                            pointStyle: 'circle'
-                          };
-                        });
-                      }
-                      return [];
-                    }
-                  }
-                },
-                tooltip: {
-                  displayColors: false,
-                  backgroundColor: '#1F2937',
-                  titleFont: {
-                    size: 14,
-                    weight: 'bold'
-                  },
-                  bodyFont: {
-                    size: 13
-                  },
-                  callbacks: {
-                    label: function(context) {
-                      const label = context.label || '';
-                      const value = context.raw;
-                      const total = context.chart._metasets[0].total;
-                      const percent = ((value / total) * 100).toFixed(1);
-                      return `${label}: ${formatCurrency(value)} (${percent}%)`;
-                    },
-                    title: function() {
-                      return ''; // Remove title
-                    }
-                  }
-                },
-              },
-              cutout: isMobile ? '50%' : '60%',
-              animation: {
-                animateScale: true,
-                animateRotate: true
-              }
-            }}
-          />
+          <Pie data={platformData} options={chartOptions} />
         </div>
       )}
     </div>

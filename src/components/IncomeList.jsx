@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../hooks/useTheme"; // Import useTheme hook
 import { orderBy } from "firebase/firestore";
 import toast, { Toaster } from "react-hot-toast";
 import IncomeRow from "./IncomeRow";
@@ -9,6 +10,7 @@ import { FiDollarSign, FiCalendar, FiLayers, FiFileText, FiTrash2, FiEdit2, FiCh
 
 function IncomeList() {
   const { currentUser } = useAuth();
+  const { theme } = useTheme(); // Get the current theme
   const [incomes, setIncomes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
@@ -100,68 +102,74 @@ function IncomeList() {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 dark:border-blue-400"></div>
       </div>
     );
   }
 
   return (
     <div className="mt-6">
-      <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
+      <Toaster 
+        position="top-center" 
+        toastOptions={{ 
+          duration: 3000,
+          className: 'dark:bg-gray-800 dark:text-white',
+        }} 
+      />
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-bold text-gray-800 flex items-center">
-          <FiDollarSign className="mr-2 text-blue-500" />
+        <h3 className="text-xl font-bold text-gray-800 dark:text-white flex items-center">
+          <FiDollarSign className="mr-2 text-blue-500 dark:text-blue-400" />
           Income History
         </h3>
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-gray-500 dark:text-gray-400">
           {incomes.length} {incomes.length === 1 ? 'record' : 'records'} found
         </div>
       </div>
       
       {incomes.length === 0 ? (
-        <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
-          <div className="text-gray-400 mb-4">
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 text-center transition-colors duration-200">
+          <div className="text-gray-400 dark:text-gray-500 mb-4">
             <FiDollarSign className="mx-auto text-4xl" />
           </div>
-          <h4 className="text-lg font-medium text-gray-700 mb-2">No income records yet</h4>
-          <p className="text-gray-500">Add your first income record to get started</p>
+          <h4 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">No income records yet</h4>
+          <p className="text-gray-500 dark:text-gray-400">Add your first income record to get started</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-200">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     <div className="flex items-center">
                       <FiDollarSign className="mr-2" />
                       Amount
                     </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     <div className="flex items-center">
                       <FiLayers className="mr-2" />
                       Platform
                     </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     <div className="flex items-center">
                       <FiCalendar className="mr-2" />
                       Date
                     </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     <div className="flex items-center">
                       <FiFileText className="mr-2" />
                       Description
                     </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {incomes.map((income) => (
                   <IncomeRow
                     key={income.id}

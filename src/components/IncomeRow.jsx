@@ -1,5 +1,6 @@
 import React from "react";
 import { FiEdit2, FiTrash2, FiSave, FiX, FiDollarSign, FiLayers, FiCalendar, FiFileText } from "react-icons/fi";
+import { useTheme } from "../hooks/useTheme";
 
 function IncomeRow({
   income,
@@ -11,6 +12,7 @@ function IncomeRow({
   handleDelete,
   formatCurrency
 }) {
+  const { theme } = useTheme();
   const isEditing = editingId === income.id;
 
   const handleInputChange = (field, value) => {
@@ -18,19 +20,19 @@ function IncomeRow({
   };
 
   return (
-    <tr className={`border-t border-gray-100 ${isEditing ? "bg-blue-50" : "hover:bg-gray-50"} transition-colors`}>
+    <tr className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'} ${isEditing ? (theme === 'dark' ? "bg-blue-900/20" : "bg-blue-50") : (theme === 'dark' ? "hover:bg-gray-700" : "hover:bg-gray-50")} transition-colors`}>
       {isEditing ? (
         <>
           <td className="p-3">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FiDollarSign className="text-gray-400" />
+                <FiDollarSign className={theme === 'dark' ? "text-gray-500" : "text-gray-400"} />
               </div>
               <input
                 type="number"
                 value={editForm.amount}
                 onChange={(e) => handleInputChange("amount", e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className={`w-full pl-10 pr-3 py-2 border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                 step="0.01"
                 min="0"
                 required
@@ -41,12 +43,12 @@ function IncomeRow({
           <td className="p-3">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FiLayers className="text-gray-400" />
+                <FiLayers className={theme === 'dark' ? "text-gray-500" : "text-gray-400"} />
               </div>
               <select
                 value={editForm.platform.toLowerCase()}
                 onChange={(e) => handleInputChange("platform", e.target.value.toLowerCase())}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+                className={`w-full pl-10 pr-3 py-2 border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none`}
                 aria-label="Platform"
               >
                 {['Fiverr', 'Upwork', 'Other', 'Freelancer', 'Toptal', 'PeoplePerHour', 'Direct Client'].map(platform => (
@@ -60,13 +62,13 @@ function IncomeRow({
           <td className="p-3">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FiCalendar className="text-gray-400" />
+                <FiCalendar className={theme === 'dark' ? "text-gray-500" : "text-gray-400"} />
               </div>
               <input
                 type="date"
                 value={editForm.date}
                 onChange={(e) => handleInputChange("date", e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className={`w-full pl-10 pr-3 py-2 border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                 required
                 aria-label="Date"
               />
@@ -75,12 +77,12 @@ function IncomeRow({
           <td className="p-3">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 pt-3 pointer-events-none">
-                <FiFileText className="text-gray-400" />
+                <FiFileText className={theme === 'dark' ? "text-gray-500" : "text-gray-400"} />
               </div>
               <textarea
                 value={editForm.description}
                 onChange={(e) => handleInputChange("description", e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className={`w-full pl-10 pr-3 py-2 border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                 rows="2"
                 aria-label="Description"
               />
@@ -109,23 +111,23 @@ function IncomeRow({
         </>
       ) : (
         <>
-          <td className="p-3 font-medium text-gray-900">
+          <td className={`p-3 font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
             {formatCurrency ? formatCurrency(income.amount) : income.amount.toFixed(2)}
           </td>
           <td className="p-3">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${theme === 'dark' ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-800'}`}>
               {income.platform}
             </span>
           </td>
-          <td className="p-3 text-gray-700">
+          <td className={`p-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
             {new Date(income.date).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'short',
               day: 'numeric'
             })}
           </td>
-          <td className="p-3 text-gray-700">
-            {income.description || <span className="text-gray-400">-</span>}
+          <td className={`p-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+            {income.description || <span className={theme === 'dark' ? "text-gray-500" : "text-gray-400"}>-</span>}
           </td>
           <td className="p-3">
             <div className="flex gap-2">
