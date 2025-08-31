@@ -18,10 +18,12 @@ import {
   FiAlertCircle,
   FiThumbsUp
 } from 'react-icons/fi';
+import { useTheme as useCustomTheme } from '../hooks/useTheme';
 
 const FeedbackPage = () => {
   const { currentUser } = useAuth();
   const theme = useTheme();
+  const { theme: customTheme } = useCustomTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [loading, setLoading] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -74,7 +76,12 @@ const FeedbackPage = () => {
 
   if (submitSuccess) {
     return (
-      <Container maxWidth="md" sx={{ py: 4, textAlign: 'center' }}>
+      <Container maxWidth="md" sx={{ 
+        py: 4, 
+        textAlign: 'center',
+        backgroundColor: customTheme === 'dark' ? 'grey.900' : 'inherit',
+        minHeight: '100vh'
+      }}>
         <Box sx={{ 
           display: 'flex',
           flexDirection: 'column',
@@ -89,8 +96,8 @@ const FeedbackPage = () => {
           }}>
             <FiCheckCircle size={40} />
           </Avatar>
-          <Typography variant="h4" gutterBottom>Thank You!</Typography>
-          <Typography color="textSecondary" paragraph sx={{ maxWidth: 500 }}>
+          <Typography variant="h4" gutterBottom color={customTheme === 'dark' ? 'white' : 'text.primary'}>Thank You!</Typography>
+          <Typography color={customTheme === 'dark' ? 'grey.400' : 'textSecondary'} paragraph sx={{ maxWidth: 500 }}>
             Your feedback has been submitted successfully. We appreciate you helping us improve the platform.
           </Typography>
           <Button 
@@ -107,10 +114,15 @@ const FeedbackPage = () => {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: isMobile ? 3 : 4 }}>
+    <Container maxWidth="md" sx={{ 
+      py: isMobile ? 3 : 4,
+      backgroundColor: customTheme === 'dark' ? 'grey.900' : 'inherit',
+      minHeight: '100vh'
+    }}>
       <Card sx={{ 
         borderLeft: `4px solid ${theme.palette.primary.main}`,
-        boxShadow: theme.shadows[3]
+        boxShadow: theme.shadows[3],
+        backgroundColor: customTheme === 'dark' ? 'grey.800' : 'white'
       }}>
         <CardContent>
           <Box sx={{ 
@@ -126,8 +138,8 @@ const FeedbackPage = () => {
               <FiThumbsUp />
             </Avatar>
             <Box>
-              <Typography variant="h5">Share Your Feedback</Typography>
-              <Typography variant="body2" color="textSecondary">
+              <Typography variant="h5" color={customTheme === 'dark' ? 'white' : 'text.primary'}>Share Your Feedback</Typography>
+              <Typography variant="body2" color={customTheme === 'dark' ? 'grey.400' : 'textSecondary'}>
                 Help us improve your experience
               </Typography>
             </Box>
@@ -137,7 +149,7 @@ const FeedbackPage = () => {
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <Box sx={{ textAlign: 'center', py: 1 }}>
-                  <Typography component="legend" variant="subtitle1" gutterBottom>
+                  <Typography component="legend" variant="subtitle1" gutterBottom color={customTheme === 'dark' ? 'white' : 'text.primary'}>
                     How would you rate your experience?
                   </Typography>
                   <Rating
@@ -157,7 +169,7 @@ const FeedbackPage = () => {
                     }}
                   />
                   {feedback.rating > 0 && (
-                    <Typography variant="caption" color="textSecondary" sx={{ ml: 1 }}>
+                    <Typography variant="caption" color={customTheme === 'dark' ? 'grey.400' : 'textSecondary'} sx={{ ml: 1 }}>
                       {feedback.rating} star{feedback.rating !== 1 ? 's' : ''}
                     </Typography>
                   )}
@@ -166,7 +178,7 @@ const FeedbackPage = () => {
 
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth>
-                  <InputLabel>Feedback Type</InputLabel>
+                  <InputLabel sx={{ color: customTheme === 'dark' ? 'grey.300' : 'inherit' }}>Feedback Type</InputLabel>
                   <Select
                     name="type"
                     value={feedback.type}
@@ -175,6 +187,10 @@ const FeedbackPage = () => {
                       ...prev, 
                       type: e.target.value
                     }))}
+                    sx={{
+                      backgroundColor: customTheme === 'dark' ? 'grey.700' : 'white',
+                      color: customTheme === 'dark' ? 'white' : 'inherit'
+                    }}
                   >
                     <MenuItem value="bug">
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -204,6 +220,15 @@ const FeedbackPage = () => {
                   value={feedback.email}
                   onChange={handleInputChange}
                   required
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      color: customTheme === 'dark' ? 'white' : 'inherit',
+                      backgroundColor: customTheme === 'dark' ? 'grey.700' : 'white'
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: customTheme === 'dark' ? 'grey.300' : 'inherit'
+                    }
+                  }}
                 />
               </Grid>
 
@@ -223,6 +248,15 @@ const FeedbackPage = () => {
                     feedback.type === 'feature' ? 'Tell us about the feature you would like to see...' :
                     'Share your thoughts with us...'
                   }
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      color: customTheme === 'dark' ? 'white' : 'inherit',
+                      backgroundColor: customTheme === 'dark' ? 'grey.700' : 'white'
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: customTheme === 'dark' ? 'grey.300' : 'inherit'
+                    }
+                  }}
                 />
               </Grid>
 
@@ -240,6 +274,7 @@ const FeedbackPage = () => {
                     />
                   }
                   label="I'd like to receive a follow-up about this feedback"
+                  sx={{ color: customTheme === 'dark' ? 'grey.300' : 'inherit' }}
                 />
               </Grid>
 
@@ -267,7 +302,7 @@ const FeedbackPage = () => {
       </Card>
 
       <Box sx={{ mt: 4 }}>
-        <Typography variant="body2" color="textSecondary" align="center">
+        <Typography variant="body2" color={customTheme === 'dark' ? 'grey.400' : 'textSecondary'} align="center">
           We review all feedback and use it to improve our platform.
         </Typography>
       </Box>

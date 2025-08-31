@@ -3,8 +3,10 @@ import { FiMail, FiArrowLeft, FiAlertCircle, FiCheck } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { auth } from "../firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
+import { useTheme } from "../hooks/useTheme";
 
 function ForgotPasswordPage() {
+  const { theme } = useTheme();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState({ text: "", type: "" }); // success/error
   const [isLoading, setIsLoading] = useState(false);
@@ -82,20 +84,20 @@ function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="max-w-md w-full space-y-6 bg-white p-8 rounded-xl shadow-md">
+    <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} p-4`}>
+      <div className={`max-w-md w-full space-y-6 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-8 rounded-xl shadow-md`}>
         <div className="text-center">
-          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
+          <div className={`mx-auto flex items-center justify-center h-12 w-12 rounded-full ${theme === 'dark' ? 'bg-blue-900/30' : 'bg-blue-100'}`}>
             <FiMail className="h-6 w-6 text-blue-600" />
           </div>
-          <h2 className="mt-3 text-2xl font-bold text-gray-900">Reset Password</h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <h2 className={`mt-3 text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Reset Password</h2>
+          <p className={`mt-2 text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
             Enter your email address and we'll send you a link to reset your password.
           </p>
         </div>
 
         {message.text && (
-          <div className={`rounded-md p-4 ${message.type === 'error' ? 'bg-red-50' : 'bg-green-50'}`}>
+          <div className={`rounded-md p-4 ${message.type === 'error' ? (theme === 'dark' ? 'bg-red-900/30' : 'bg-red-50') : (theme === 'dark' ? 'bg-green-900/30' : 'bg-green-50')}`}>
             <div className="flex">
               <div className="flex-shrink-0">
                 {message.type === 'error' ? (
@@ -106,7 +108,7 @@ function ForgotPasswordPage() {
               </div>
               <div className="ml-3">
                 <p className={`text-sm font-medium ${
-                  message.type === 'error' ? 'text-red-800' : 'text-green-800'
+                  message.type === 'error' ? (theme === 'dark' ? 'text-red-300' : 'text-red-800') : (theme === 'dark' ? 'text-green-300' : 'text-green-800')
                 }`}>
                   {message.text}
                 </p>
@@ -117,7 +119,7 @@ function ForgotPasswordPage() {
 
         <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
               Email address
             </label>
             <div className="mt-1">
@@ -129,7 +131,7 @@ function ForgotPasswordPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className={`appearance-none block w-full px-3 py-2 border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'} rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
                 placeholder="you@example.com"
               />
             </div>
@@ -151,7 +153,7 @@ function ForgotPasswordPage() {
         <div className="text-center">
           <Link
             to="/login"
-            className="text-sm font-medium text-blue-600 hover:text-blue-500 flex items-center justify-center"
+            className={`text-sm font-medium ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-500'} flex items-center justify-center`}
           >
             <FiArrowLeft className="mr-1" /> Back to login
           </Link>
