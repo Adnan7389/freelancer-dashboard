@@ -25,9 +25,11 @@ import {
   FiArrowUp,
   FiChevronRight
 } from 'react-icons/fi';
+import { useTheme as useCustomTheme } from '../hooks/useTheme';
 
 const Legal = () => {
   const theme = useTheme();
+  const { theme: customTheme } = useCustomTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -132,7 +134,9 @@ const Legal = () => {
   return (
     <Container maxWidth="md" sx={{ 
       py: isMobile ? 3 : 4,
-      position: 'relative'
+      position: 'relative',
+      backgroundColor: customTheme === 'dark' ? 'grey.900' : 'inherit',
+      minHeight: '100vh'
     }}>
       {/* Floating back to top button */}
       <Box sx={{ 
@@ -268,7 +272,7 @@ const Legal = () => {
           </Typography>
         </Box>
         
-        <Typography variant={isMobile ? "body2" : "body1"} paragraph sx={{ mb: 4 }}>
+        <Typography variant={isMobile ? "body2" : "body1"} paragraph sx={{ mb: 4, color: customTheme === 'dark' ? 'grey.300' : 'inherit' }}>
           {privacyPolicyContent.introduction}
         </Typography>
 
@@ -279,7 +283,7 @@ const Legal = () => {
               mb: 3,
               borderRadius: 2,
               borderLeft: `4px solid ${theme.palette.primary.main}`,
-              backgroundColor: theme.palette.background.paper
+              backgroundColor: customTheme === 'dark' ? 'grey.800' : theme.palette.background.paper
             }}>
               <Box sx={{ 
                 display: 'flex',
@@ -291,13 +295,13 @@ const Legal = () => {
                   size: 20,
                   color: theme.palette.primary.main 
                 })}
-                <Typography variant={isMobile ? "subtitle1" : "h6"} component="h3" sx={{ fontWeight: 600 }}>
+                <Typography variant={isMobile ? "subtitle1" : "h6"} component="h3" sx={{ fontWeight: 600, color: customTheme === 'dark' ? 'white' : 'inherit' }}>
                   {section.title}
                 </Typography>
               </Box>
 
               {section.content && (
-                <Typography variant={isMobile ? "body2" : "body1"} paragraph>
+                <Typography variant={isMobile ? "body2" : "body1"} paragraph sx={{ color: customTheme === 'dark' ? 'grey.300' : 'inherit' }}>
                   {section.content}
                 </Typography>
               )}
@@ -323,7 +327,10 @@ const Legal = () => {
                         primary={item} 
                         primaryTypographyProps={{ 
                           variant: isMobile ? "body2" : "body1",
-                          sx: { lineHeight: 1.5 }
+                          sx: { 
+                            lineHeight: 1.5,
+                            color: customTheme === 'dark' ? 'grey.300' : 'inherit'
+                          }
                         }} 
                       />
                     </ListItem>
@@ -333,7 +340,7 @@ const Legal = () => {
 
               {section.contact && (
                 <Box sx={{ mt: 3 }}>
-                  <Typography variant={isMobile ? "body2" : "body1"} paragraph>
+                  <Typography variant={isMobile ? "body2" : "body1"} paragraph sx={{ color: customTheme === 'dark' ? 'grey.300' : 'inherit' }}>
                     {section.contact.text}
                   </Typography>
                   <Button 
@@ -358,7 +365,7 @@ const Legal = () => {
 
       <Divider sx={{ 
         my: isMobile ? 4 : 6,
-        borderColor: theme.palette.divider,
+        borderColor: customTheme === 'dark' ? 'grey.700' : theme.palette.divider,
         borderBottomWidth: 2
       }} />
 
@@ -380,7 +387,7 @@ const Legal = () => {
           </Typography>
         </Box>
         
-        <Typography variant={isMobile ? "body2" : "body1"} paragraph sx={{ mb: 4 }}>
+        <Typography variant={isMobile ? "body2" : "body1"} paragraph sx={{ mb: 4, color: customTheme === 'dark' ? 'grey.300' : 'inherit' }}>
           {termsOfServiceContent.introduction}
         </Typography>
 
@@ -391,7 +398,7 @@ const Legal = () => {
               mb: 3,
               borderRadius: 2,
               borderLeft: `4px solid ${theme.palette.secondary.main}`,
-              backgroundColor: theme.palette.background.paper
+              backgroundColor: customTheme === 'dark' ? 'grey.800' : theme.palette.background.paper
             }}>
               <Box sx={{ 
                 display: 'flex',
@@ -403,13 +410,13 @@ const Legal = () => {
                   size: 20,
                   color: theme.palette.secondary.main 
                 })}
-                <Typography variant={isMobile ? "subtitle1" : "h6"} component="h3" sx={{ fontWeight: 600 }}>
+                <Typography variant={isMobile ? "subtitle1" : "h6"} component="h3" sx={{ fontWeight: 600, color: customTheme === 'dark' ? 'white' : 'inherit' }}>
                   {section.title}
                 </Typography>
               </Box>
 
               {section.content && (
-                <Typography variant={isMobile ? "body2" : "body1"} paragraph>
+                <Typography variant={isMobile ? "body2" : "body1"} paragraph sx={{ color: customTheme === 'dark' ? 'grey.300' : 'inherit' }}>
                   {section.content}
                 </Typography>
               )}
@@ -435,7 +442,10 @@ const Legal = () => {
                         primary={item} 
                         primaryTypographyProps={{ 
                           variant: isMobile ? "body2" : "body1",
-                          sx: { lineHeight: 1.5 }
+                          sx: { 
+                            lineHeight: 1.5,
+                            color: customTheme === 'dark' ? 'grey.300' : 'inherit'
+                          }
                         }} 
                       />
                     </ListItem>
