@@ -8,7 +8,8 @@ import {
   DialogTitle,
   Box,
   CircularProgress,
-  Typography
+  Typography,
+  useTheme
 } from '@mui/material';
 import { useSubscription } from '../../hooks/useSubscription';
 
@@ -21,6 +22,7 @@ export function CancelSubscriptionButton({ onCancelled, onReactivated, subscript
     isLoading, 
     error 
   } = useSubscription();
+  const theme = useTheme();
 
   // Update local state when subscription status changes
   useEffect(() => {
@@ -58,14 +60,14 @@ export function CancelSubscriptionButton({ onCancelled, onReactivated, subscript
 
   const dialogContent = isCancelled ? (
     <DialogContent>
-      <DialogContentText>
+      <DialogContentText color="text.secondary">
         Reactivating your subscription will restore full access to all Pro features. 
         Your billing cycle will continue from today.
       </DialogContentText>
     </DialogContent>
   ) : (
     <DialogContent>
-      <DialogContentText>
+      <DialogContentText color="text.secondary">
         Are you sure you want to cancel your subscription? You'll continue to have access until the end of your billing period.
       </DialogContentText>
     </DialogContent>
@@ -108,14 +110,23 @@ export function CancelSubscriptionButton({ onCancelled, onReactivated, subscript
         onClose={handleClose}
         maxWidth="sm"
         fullWidth
+        PaperProps={{
+          sx: {
+            bgcolor: 'background.paper',
+            backgroundImage: 'none'
+          }
+        }}
       >
-        <DialogTitle>{dialogTitle}</DialogTitle>
+        <DialogTitle sx={{ color: 'text.primary' }}>
+          {dialogTitle}
+        </DialogTitle>
         {dialogContent}
         <DialogActions sx={{ p: 2, pt: 0 }}>
           <Button 
             onClick={handleClose} 
             disabled={isLoading}
             variant="outlined"
+            sx={{ color: 'text.secondary' }}
           >
             {isCancelled ? 'Not Now' : 'Keep Subscription'}
           </Button>
