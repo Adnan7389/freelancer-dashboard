@@ -125,13 +125,24 @@ export default function AdminFeedbackPage() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Paper elevation={0} sx={{ p: 3, mb: 4, borderRadius: 3 }}>
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          p: 3, 
+          mb: 4, 
+          borderRadius: 3,
+          bgcolor: 'background.paper',
+          border: theme.palette.mode === 'dark' ? '1px solid rgba(255, 255, 255, 0.12)' : 'none'
+        }}
+      >
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
           <Box display="flex" alignItems="center" gap={2}>
             <Avatar sx={{ bgcolor: 'primary.main', color: 'white' }}>
               <FiStar />
             </Avatar>
-            <Typography variant="h4" fontWeight={600}>Feedback Management</Typography>
+            <Typography variant="h4" fontWeight={600} color="text.primary">
+              Feedback Management
+            </Typography>
             <Badge 
               badgeContent={feedbackList.length} 
               color="primary" 
@@ -139,7 +150,11 @@ export default function AdminFeedbackPage() {
             />
           </Box>
           <Tooltip title="Refresh feedback">
-            <IconButton onClick={fetchFeedback} disabled={loading}>
+            <IconButton 
+              onClick={fetchFeedback} 
+              disabled={loading}
+              sx={{ color: 'text.secondary' }}
+            >
               <FiRefreshCw />
             </IconButton>
           </Tooltip>
@@ -184,7 +199,7 @@ export default function AdminFeedbackPage() {
       {feedbackList.length === 0 ? (
         <Card variant="outlined">
           <CardContent sx={{ textAlign: 'center', py: 6 }}>
-            <FiStar size={48} style={{ marginBottom: 16, opacity: 0.5 }} />
+            <FiStar size={48} style={{ marginBottom: 16, opacity: 0.5, color: theme.palette.text.secondary }} />
             <Typography variant="h6" color="text.secondary">
               No feedback found matching your criteria
             </Typography>
@@ -206,7 +221,7 @@ export default function AdminFeedbackPage() {
             const typeConfig = getTypeConfig(item.type);
             const statusConfig = getStatusConfig(item.status);
             const borderColor = typeConfig.color === 'default' ? 
-              theme.palette.grey[400] : 
+              theme.palette.divider : 
               theme.palette[typeConfig.color].main;
             
             return (
@@ -214,17 +229,23 @@ export default function AdminFeedbackPage() {
                 <Card 
                   variant="outlined"
                   sx={{
-                    borderLeft: `4px solid ${borderColor}`
+                    borderLeft: `4px solid ${borderColor}`,
+                    bgcolor: 'background.paper'
                   }}
                 >
                   <CardContent>
                     <Box display="flex" justifyContent="space-between" alignItems="flex-start">
                       <Box>
                         <Box display="flex" alignItems="center" gap={1} mb={1}>
-                          <Avatar sx={{ width: 32, height: 32, bgcolor: 'grey.200' }}>
+                          <Avatar sx={{ 
+                            width: 32, 
+                            height: 32, 
+                            bgcolor: theme.palette.mode === 'dark' ? 'grey.700' : 'grey.200',
+                            color: theme.palette.mode === 'dark' ? 'grey.300' : 'grey.600'
+                          }}>
                             {item.email ? <FiUser /> : 'A'}
                           </Avatar>
-                          <Typography variant="subtitle1" fontWeight={500}>
+                          <Typography variant="subtitle1" fontWeight={500} color="text.primary">
                             {item.email || 'Anonymous User'}
                           </Typography>
                         </Box>
@@ -266,7 +287,7 @@ export default function AdminFeedbackPage() {
                       </Box>
                     </Box>
                     
-                    <Typography variant="body1" paragraph sx={{ mt: 2 }}>
+                    <Typography variant="body1" paragraph sx={{ mt: 2, color: 'text.primary' }}>
                       {item.comment}
                     </Typography>
                     
