@@ -169,7 +169,7 @@ export default function SubscriptionPage() {
           <Grid container spacing={2}>
             <Grid item xs={12} md={8}>
               <Box display="flex" alignItems="center" mb={1}>
-                <Typography variant="h6" component="div">
+                <Typography variant="h6" component="div" color="text.primary">
                   {plan} Plan
                 </Typography>
                 {getStatusChip(status)}
@@ -228,7 +228,7 @@ export default function SubscriptionPage() {
 
   return (
     <Container maxWidth="md" sx={{ py: isMobile ? 2 : 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
+      <Typography variant="h4" component="h1" gutterBottom color="text.primary">
         Subscription Management
       </Typography>
       
@@ -242,7 +242,7 @@ export default function SubscriptionPage() {
           borderColor: 'divider'
         }}
       >
-        <Typography variant="h6" gutterBottom sx={{ mb: 3, display: 'flex', alignItems: 'center' }}>
+        <Typography variant="h6" gutterBottom sx={{ mb: 3, display: 'flex', alignItems: 'center', color: 'text.primary' }}>
           <CardMembershipIcon sx={{ mr: 1, color: 'primary.main' }} />
           Your Subscription
         </Typography>
@@ -252,7 +252,7 @@ export default function SubscriptionPage() {
         <Divider sx={{ my: 3 }} />
         
         <Box>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" gutterBottom color="text.primary">
             Plan Benefits
           </Typography>
           <Grid container spacing={2}>
@@ -260,7 +260,7 @@ export default function SubscriptionPage() {
               <Box display="flex" mb={1}>
                 <CheckCircleIcon color="success" sx={{ mr: 1, mt: 0.5 }} />
                 <Box>
-                  <Typography variant="subtitle2">Unlimited Projects</Typography>
+                  <Typography variant="subtitle2" color="text.primary">Unlimited Projects</Typography>
                   <Typography variant="body2" color="text.secondary">
                     Create and manage unlimited projects
                   </Typography>
@@ -271,7 +271,7 @@ export default function SubscriptionPage() {
               <Box display="flex" mb={1}>
                 <CheckCircleIcon color="success" sx={{ mr: 1, mt: 0.5 }} />
                 <Box>
-                  <Typography variant="subtitle2">Advanced Analytics</Typography>
+                  <Typography variant="subtitle2" color="text.primary">Advanced Analytics</Typography>
                   <Typography variant="body2" color="text.secondary">
                     Access to detailed project analytics
                   </Typography>
@@ -282,7 +282,7 @@ export default function SubscriptionPage() {
               <Box display="flex" mb={1}>
                 <CheckCircleIcon color="success" sx={{ mr: 1, mt: 0.5 }} />
                 <Box>
-                  <Typography variant="subtitle2">Priority Support</Typography>
+                  <Typography variant="subtitle2" color="text.primary">Priority Support</Typography>
                   <Typography variant="body2" color="text.secondary">
                     Get help from our support team
                   </Typography>
@@ -293,7 +293,7 @@ export default function SubscriptionPage() {
               <Box display="flex" mb={1}>
                 <CheckCircleIcon color="success" sx={{ mr: 1, mt: 0.5 }} />
                 <Box>
-                  <Typography variant="subtitle2">Early Access</Typography>
+                  <Typography variant="subtitle2" color="text.primary">Early Access</Typography>
                   <Typography variant="body2" color="text.secondary">
                     Try new features before everyone else
                   </Typography>
