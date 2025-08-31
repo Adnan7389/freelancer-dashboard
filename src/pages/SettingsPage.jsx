@@ -6,8 +6,10 @@ import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { FiMenu, FiX } from "react-icons/fi";
 import { useState, useEffect } from "react";
+import { useTheme } from "../hooks/useTheme";
 
 function SettingsPage() {
+  const { theme } = useTheme();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -42,7 +44,7 @@ function SettingsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} flex flex-col lg:flex-row`}>
       {/* Mobile Toggle Button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}

@@ -3,8 +3,10 @@ import { confirmPasswordReset, verifyPasswordResetCode } from "firebase/auth";
 import { auth } from "../firebase";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { FiLock, FiCheck, FiAlertCircle, FiArrowLeft, FiEye, FiEyeOff } from "react-icons/fi";
+import { useTheme } from "../hooks/useTheme";
 
 function ResetPasswordPage() {
+  const { theme } = useTheme();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
@@ -124,14 +126,14 @@ function ResetPasswordPage() {
 
   if (message.type === "error" && !oobCode) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <div className="max-w-md w-full space-y-6 bg-white p-8 rounded-xl shadow-md">
+      <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} p-4`}>
+        <div className={`max-w-md w-full space-y-6 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-8 rounded-xl shadow-md`}>
           <div className="text-center">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+            <div className={`mx-auto flex items-center justify-center h-12 w-12 rounded-full ${theme === 'dark' ? 'bg-red-900/30' : 'bg-red-100'}`}>
               <FiAlertCircle className="h-6 w-6 text-red-600" />
             </div>
-            <h2 className="mt-3 text-2xl font-bold text-gray-900">Error</h2>
-            <p className="mt-2 text-sm text-gray-600">{message.text}</p>
+            <h2 className={`mt-3 text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Error</h2>
+            <p className={`mt-2 text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{message.text}</p>
           </div>
           <div className="mt-6">
             <button
@@ -147,20 +149,20 @@ function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="max-w-md w-full space-y-6 bg-white p-8 rounded-xl shadow-md">
+    <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} p-4`}>
+      <div className={`max-w-md w-full space-y-6 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-8 rounded-xl shadow-md`}>
         <div className="text-center">
-          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+          <div className={`mx-auto flex items-center justify-center h-12 w-12 rounded-full ${theme === 'dark' ? 'bg-green-900/30' : 'bg-green-100'}`}>
             <FiLock className="h-6 w-6 text-green-600" />
           </div>
-          <h2 className="mt-3 text-2xl font-bold text-gray-900">Reset Password</h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <h2 className={`mt-3 text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Reset Password</h2>
+          <p className={`mt-2 text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
             Enter your new password for {email}
           </p>
         </div>
 
         {message.text && (
-          <div className={`rounded-md p-4 ${message.type === 'error' ? 'bg-red-50' : 'bg-green-50'}`}>
+          <div className={`rounded-md p-4 ${message.type === 'error' ? (theme === 'dark' ? 'bg-red-900/30' : 'bg-red-50') : (theme === 'dark' ? 'bg-green-900/30' : 'bg-green-50')}`}>
             <div className="flex">
               <div className="flex-shrink-0">
                 {message.type === 'error' ? (
@@ -171,7 +173,7 @@ function ResetPasswordPage() {
               </div>
               <div className="ml-3">
                 <p className={`text-sm font-medium ${
-                  message.type === 'error' ? 'text-red-800' : 'text-green-800'
+                  message.type === 'error' ? (theme === 'dark' ? 'text-red-300' : 'text-red-800') : (theme === 'dark' ? 'text-green-300' : 'text-green-800')
                 }`}>
                   {message.text}
                 </p>
@@ -183,7 +185,7 @@ function ResetPasswordPage() {
         <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                 New Password
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
@@ -195,13 +197,13 @@ function ResetPasswordPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pr-10 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border"
+                  className={`block w-full pr-10 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'} rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border`}
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                    className={`${theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'} focus:outline-none`}
                   >
                     {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
                   </button>
@@ -210,7 +212,7 @@ function ResetPasswordPage() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="confirmPassword" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                 Confirm New Password
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
@@ -222,13 +224,13 @@ function ResetPasswordPage() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="block w-full pr-10 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border"
+                  className={`block w-full pr-10 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'} rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border`}
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                    className={`${theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'} focus:outline-none`}
                   >
                     {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
                   </button>
@@ -238,15 +240,15 @@ function ResetPasswordPage() {
 
             {/* Password Requirements */}
             <div className="mt-2">
-              <p className="text-xs text-gray-500">Password must contain:</p>
-              <ul className="text-xs text-gray-600 space-y-1 mt-1">
-                <li className={`flex items-center ${passwordRequirements.minLength ? 'text-green-600' : 'text-gray-500'}`}>
+              <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Password must contain:</p>
+              <ul className={`text-xs space-y-1 mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                <li className={`flex items-center ${passwordRequirements.minLength ? 'text-green-600' : (theme === 'dark' ? 'text-gray-500' : 'text-gray-500')}`}>
                   {passwordRequirements.minLength ? <FiCheck className="mr-1" /> : '•'} At least 8 characters
                 </li>
-                <li className={`flex items-center ${passwordRequirements.hasNumber ? 'text-green-600' : 'text-gray-500'}`}>
+                <li className={`flex items-center ${passwordRequirements.hasNumber ? 'text-green-600' : (theme === 'dark' ? 'text-gray-500' : 'text-gray-500')}`}>
                   {passwordRequirements.hasNumber ? <FiCheck className="mr-1" /> : '•'} At least one number
                 </li>
-                <li className={`flex items-center ${passwordRequirements.hasSpecialChar ? 'text-green-600' : 'text-gray-500'}`}>
+                <li className={`flex items-center ${passwordRequirements.hasSpecialChar ? 'text-green-600' : (theme === 'dark' ? 'text-gray-500' : 'text-gray-500')}`}>
                   {passwordRequirements.hasSpecialChar ? <FiCheck className="mr-1" /> : '•'} At least one special character
                 </li>
               </ul>
@@ -269,7 +271,7 @@ function ResetPasswordPage() {
         <div className="text-center">
           <button
             onClick={() => navigate("/login")}
-            className="text-sm font-medium text-indigo-600 hover:text-indigo-500 flex items-center justify-center mx-auto"
+            className={`text-sm font-medium ${theme === 'dark' ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-500'} flex items-center justify-center mx-auto`}
           >
             <FiArrowLeft className="mr-1" /> Back to login
           </button>
